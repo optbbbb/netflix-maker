@@ -94,11 +94,8 @@ textarea{
 }
 
 .bg{
-  position:absolute;
-  inset:0;
   background-size:cover;
-  background-position:center;
-  opacity:.75;
+  background-position:center top;
 }
 
 .gradient{
@@ -110,11 +107,10 @@ textarea{
 }
 
 .content{
-  position:absolute;
+   position:absolute;
   left:60px;
   top:70px;
   width:450px;
-  height:390px;
 }
 
 .netflix-mini{
@@ -127,14 +123,15 @@ textarea{
 }
 
 .title{
-   width:450px;
-  min-height:70px;
+  width:450px;
+
+  max-height:140px;
 
   font-size:58px;
   font-weight:900;
   line-height:1.05;
 
-  margin-bottom:8px;
+  margin-bottom:12px;
 
   overflow:hidden;
   word-break:keep-all;
@@ -145,19 +142,23 @@ textarea{
   height:28px;
   color:#ccc;
   font-size:16px;
-  margin-bottom:14px;
+  margin-bottom:8px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 
 .desc{
-  width:450px;
-  height:115px;
+ width:450px;
+
+  max-height:120px;
+
   color:#eee;
   font-size:18px;
   line-height:1.45;
-  margin-bottom:22px;
+
+  margin-bottom:14px;
+
   overflow:hidden;
   word-break:keep-all;
 }
@@ -246,8 +247,8 @@ function updateAll(){
   $("buttonText").innerText = $("buttonInput").value;
 
   requestAnimationFrame(()=>{
-    fitText($("titleText"), 58, 24);
-    fitText($("descText"), 18, 12);
+    fitText($("titleText"), 58, 18);
+    fitText($("descText"), 20, 12);
   });
 }
 
