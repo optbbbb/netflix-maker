@@ -105,7 +105,7 @@ textarea{
   position:absolute;
   inset:0;
   background:
-    linear-gradient(90deg,#000 0%,rgba(0,0,0,.86) 34%,rgba(0,0,0,.22) 68%,rgba(0,0,0,.05) 100%),
+    linear-gradient(90deg,#000 0%,rgba(0,0,0,.86) 36%,rgba(0,0,0,.28) 70%,rgba(0,0,0,.05) 100%),
     linear-gradient(0deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,0) 42%);
 }
 
@@ -113,7 +113,7 @@ textarea{
   position:absolute;
   left:60px;
   top:76px;
-  width:520px;
+  width:620px;
 }
 
 .netflix-mini{
@@ -121,23 +121,23 @@ textarea{
   font-size:22px;
   font-weight:900;
   margin-bottom:18px;
-  letter-spacing:.02em;
 }
 
 .title{
-  width:520px;
-  max-height:142px;
-  font-size:76px;
+  width:620px;
+  max-height:155px;
+  font-size:72px;
   font-weight:900;
-  line-height:0.98;
+  line-height:1.12;
   margin-bottom:18px;
   overflow:hidden;
   word-break:keep-all;
   letter-spacing:-2px;
+  padding-bottom:8px;
 }
 
 .meta{
-  width:520px;
+  width:560px;
   color:#ccc;
   font-size:18px;
   margin-bottom:18px;
@@ -147,8 +147,8 @@ textarea{
 }
 
 .desc{
-  width:500px;
-  max-height:118px;
+  width:560px;
+  max-height:115px;
   color:#eee;
   font-size:19px;
   line-height:1.45;
@@ -169,18 +169,6 @@ textarea{
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
-}
-
-.credit{
-  position:absolute;
-  right:34px;
-  bottom:28px;
-  z-index:5;
-  color:rgba(255,255,255,.75);
-  font-size:15px;
-  font-weight:700;
-  letter-spacing:.02em;
-  text-shadow:0 2px 8px rgba(0,0,0,.8);
 }
 </style>
 </head>
@@ -211,9 +199,6 @@ textarea{
 
     <label>버튼 문구</label>
     <input id="buttonInput" value="▶ 재생">
-
-    <label>오른쪽 하단 제작자명</label>
-    <input id="creditInput" value="MADE BY OP T">
   </div>
 
   <div class="preview-area">
@@ -228,8 +213,6 @@ textarea{
         <div class="desc" id="descText">사막 한복판의 냉각 리조트. 손님들은 완벽한 휴식을 위해 이곳에 도착하지만, 곧 이 유토피아의 이상한 규칙을 마주한다.</div>
         <div class="play" id="buttonText">▶ 재생</div>
       </div>
-
-      <div class="credit" id="creditText">MADE BY OP T</div>
     </div>
   </div>
 </div>
@@ -257,15 +240,14 @@ function updateAll(){
   $("metaText").innerText = $("metaInput").value;
   $("descText").innerText = $("descInput").value;
   $("buttonText").innerText = $("buttonInput").value;
-  $("creditText").innerText = $("creditInput").value;
 
   requestAnimationFrame(()=>{
-    fitText($("titleText"), 76, 42);
+    fitText($("titleText"), 72, 44);
     fitText($("descText"), 19, 13);
   });
 }
 
-["titleInput","labelInput","metaInput","descInput","buttonInput","creditInput"].forEach(id=>{
+["titleInput","labelInput","metaInput","descInput","buttonInput"].forEach(id=>{
   $(id).oninput = updateAll;
 });
 
@@ -298,7 +280,7 @@ function savePNG(){
         link.href=canvas.toDataURL("image/png");
         link.click();
       });
-    },100);
+    },120);
   });
 }
 
