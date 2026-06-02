@@ -180,6 +180,7 @@ button{
   justify-content:center;
   font-size:32px;
   font-weight:900;
+  cursor:pointer;
 }
 
 .list{
@@ -197,6 +198,17 @@ button{
   align-items:center;
   gap:12px;
   margin-bottom:14px;
+  cursor:pointer;
+  padding:8px;
+  border-radius:10px;
+}
+
+.item:hover{
+  background:#202020;
+}
+
+.item.active{
+  background:#282828;
 }
 
 .thumb{
@@ -221,6 +233,12 @@ button{
 
 .result{
   margin-top:20px;
+}
+
+.youtube-box{
+  width:0;
+  height:0;
+  overflow:hidden;
 }
 </style>
 </head>
@@ -267,7 +285,7 @@ button{
 
       <div class="controls">
         <div>⏮</div>
-        <div class="play">▶</div>
+        <div class="play" id="previewPlayBtn" onclick="previewToggleMusic()">▶</div>
         <div>⏭</div>
       </div>
 
@@ -278,6 +296,8 @@ button{
     </div>
   </div>
 </div>
+
+<div class="youtube-box" id="youtubeBox"></div>
 
 <script>
 const $ = id => document.getElementById(id);
@@ -294,6 +314,9 @@ let startX = 0;
 let startY = 0;
 let startImgX = 0;
 let startImgY = 0;
+
+let previewPlaying = false;
+let previewCurrentIndex = 0;
 
 function getYoutubeId(url){
   if(!url) return "";
@@ -434,6 +457,50 @@ function collectSongs(){
   }).filter(song=>song.title);
 }
 
+function previewLoadSong(song, index){
+  if(!song.youtube) return;
+
+  previewCurrentIndex = index;
+  previewPlaying = false;
+  $("previewPlayBtn").innerText = "▶";
+
+  $("youtubeBox").innerHTML = `
+    <iframe
+      id="previewYt"
+      width="1"
+      height="1"
+      src="https://www.youtube.com/embed/${song.youtube}?enablejsapi=1&origin=${location.origin}"
+      allow="autoplay"
+    ></iframe>
+  `;
+
+  document.querySelectorAll(".item").forEach((item, i)=>{
+    item.classList.toggle("active", i === index);
+  });
+}
+
+function previewToggleMusic(){
+  const iframe = document.getElementById("previewYt");
+  const songs = collectSongs();
+
+  if(!iframe){
+    if(songs.length){
+      previewLoadSong(songs[0], 0);
+    }
+    return;
+  }
+
+  if(!previewPlaying){
+    iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    $("previewPlayBtn").innerText = "Ⅱ";
+    previewPlaying = true;
+  }else{
+    iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+    $("previewPlayBtn").innerText = "▶";
+    previewPlaying = false;
+  }
+}
+
 function updatePreview(){
   $("previewTitle").innerText = $("homeTitle").value;
   $("previewName").innerText = $("homeName").value;
@@ -442,9 +509,13 @@ function updatePreview(){
 
   $("previewSongs").innerHTML = "";
 
-  songs.forEach(song=>{
+  songs.forEach((song, index)=>{
     const item = document.createElement("div");
-    item.className = "item";
+    item.className = "item" + (index === previewCurrentIndex ? " active" : "");
+
+    item.onclick = () => {
+      previewLoadSong(song, index);
+    };
 
     item.innerHTML = `
       <div class="thumb" style="background-image:url('${song.cover || ""}')"></div>
