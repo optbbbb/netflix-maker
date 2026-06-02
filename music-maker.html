@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>Spotify Character Maker</title>
+<title>Music Home Maker</title>
 
 <style>
 *{box-sizing:border-box}
@@ -17,7 +17,7 @@ body{
 .wrap{
   min-height:100vh;
   display:grid;
-  grid-template-columns:400px 1fr;
+  grid-template-columns:390px 1fr;
 }
 
 .panel{
@@ -29,15 +29,8 @@ body{
 }
 
 h1{
-  margin:0 0 22px;
-  font-size:27px;
-}
-
-small{
-  display:block;
-  color:#999;
-  line-height:1.5;
-  margin-bottom:22px;
+  margin:0 0 20px;
+  font-size:26px;
 }
 
 label{
@@ -97,22 +90,18 @@ button{
   border-radius:16px;
 }
 
-.result{
-  margin-top:20px;
-}
-
 .preview{
   min-height:100vh;
   display:flex;
   align-items:center;
   justify-content:center;
   padding:40px;
-  background:#111;
+  background:#101010;
 }
 
 .app{
-  width:min(100%,520px);
-  height:760px;
+  width:min(100%,460px);
+  min-height:760px;
   background:#121212;
   overflow:hidden;
   border-radius:22px;
@@ -120,8 +109,9 @@ button{
 }
 
 .album-head{
-  padding:28px;
-  background:linear-gradient(180deg,rgba(255,255,255,.18),#121212 82%);
+  padding:28px 26px 24px;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.22),rgba(18,18,18,.96) 88%);
 }
 
 .album-info{
@@ -131,14 +121,13 @@ button{
 }
 
 .cover-wrap{
-  width:150px;
-  height:150px;
+  width:132px;
+  height:132px;
   background:#333;
   flex-shrink:0;
-  position:relative;
   overflow:hidden;
-  box-shadow:0 10px 30px rgba(0,0,0,.35);
   cursor:grab;
+  box-shadow:0 12px 35px rgba(0,0,0,.45);
 }
 
 .cover-wrap:active{
@@ -158,27 +147,28 @@ button{
   font-size:12px;
   font-weight:900;
   color:#eee;
+  margin-bottom:8px;
 }
 
 .album-title{
-  font-size:44px;
+  font-size:42px;
   font-weight:900;
-  line-height:1;
-  margin:8px 0;
+  line-height:.95;
+  margin-bottom:10px;
   word-break:keep-all;
 }
 
 .album-meta{
   font-size:14px;
   color:#ddd;
-  line-height:1.5;
+  line-height:1.45;
 }
 
 .actions{
   display:flex;
   align-items:center;
-  gap:18px;
-  padding:18px 28px 6px;
+  gap:22px;
+  padding:18px 26px 8px;
 }
 
 .play-main{
@@ -192,20 +182,33 @@ button{
   justify-content:center;
   font-size:25px;
   font-weight:900;
+  cursor:pointer;
 }
 
 .action-icon{
   color:#bbb;
-  font-size:23px;
+  font-size:25px;
+  cursor:pointer;
+}
+
+.action-icon:hover{
+  color:white;
+}
+
+.list-mode{
+  margin-left:auto;
+  color:#aaa;
+  font-size:14px;
+  font-weight:800;
 }
 
 .song-table{
-  padding:8px 28px 90px;
+  padding:8px 26px 34px;
 }
 
 .table-head{
   display:grid;
-  grid-template-columns:32px 1fr 52px;
+  grid-template-columns:34px 1fr 54px;
   color:#999;
   font-size:13px;
   padding:10px 0;
@@ -214,25 +217,33 @@ button{
 
 .preview-item{
   display:grid;
-  grid-template-columns:32px 1fr 52px;
+  grid-template-columns:34px 1fr 54px;
   align-items:center;
   padding:12px 0;
   border-radius:8px;
+  cursor:pointer;
+}
+
+.preview-item:hover{
+  background:#1b1b1b;
+  margin:0 -8px;
+  padding:12px 8px;
 }
 
 .preview-item.active{
-  background:#1f1f1f;
+  background:#242424;
   margin:0 -8px;
   padding:12px 8px;
 }
 
 .index{
   color:#aaa;
+  font-size:15px;
 }
 
 .preview-title{
   font-size:15px;
-  font-weight:800;
+  font-weight:900;
 }
 
 .preview-artist{
@@ -247,55 +258,8 @@ button{
   text-align:right;
 }
 
-.mini-player{
-  position:absolute;
-  left:50%;
-  bottom:28px;
-  transform:translateX(-50%);
-  width:min(460px,calc(100% - 64px));
-  background:#242424;
-  border:1px solid #333;
-  border-radius:12px;
-  padding:10px;
-  display:grid;
-  grid-template-columns:48px 1fr 42px;
-  align-items:center;
-  gap:10px;
-}
-
-.mini-thumb{
-  width:48px;
-  height:48px;
-  background:#333;
-  background-size:cover;
-  background-position:center;
-}
-
-.mini-title{
-  font-size:14px;
-  font-weight:800;
-}
-
-.mini-artist{
-  color:#aaa;
-  font-size:12px;
-  margin-top:4px;
-}
-
-.mini-play{
-  width:36px;
-  height:36px;
-  border-radius:50%;
-  background:var(--accent);
-  color:black;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:900;
-}
-
-.preview-shell{
-  position:relative;
+.result{
+  margin-top:20px;
 }
 
 .youtube-box{
@@ -318,10 +282,9 @@ button{
   }
 }
 
-@media(max-width:560px){
+@media(max-width:520px){
   .app{
     width:100%;
-    height:auto;
     min-height:100vh;
     border-radius:0;
   }
@@ -332,8 +295,8 @@ button{
   }
 
   .cover-wrap{
-    width:180px;
-    height:180px;
+    width:148px;
+    height:148px;
   }
 
   .album-title{
@@ -348,13 +311,12 @@ button{
 <div class="wrap">
   <div class="panel">
     <h1>music home maker</h1>
-    <small>캐릭터 이미지와 유튜브 링크를 넣어 스포티파이 느낌의 음악 홈피를 만듭니다.</small>
 
     <label>앨범 / 홈피 제목</label>
-    <input id="homeTitle" value="내 현재 재생목록">
+    <input id="homeTitle" value="EVOL">
 
-    <label>캐릭터 / 제작자 이름</label>
-    <input id="homeName" value="OP T">
+    <label>캐릭터 / 아티스트명</label>
+    <input id="homeName" value="Royal 44">
 
     <label>앨범 커버 이미지</label>
     <input type="file" id="mainImage" accept="image/*">
@@ -377,51 +339,39 @@ button{
   </div>
 
   <div class="preview">
-    <div class="preview-shell">
-      <div class="app">
-        <div class="album-head">
-          <div class="album-info">
-            <div class="cover-wrap" id="coverWrap">
-              <img class="cover-img" id="coverImg" draggable="false">
-            </div>
-
-            <div>
-              <div class="type">앨범</div>
-              <div class="album-title" id="previewTitle">내 현재 재생목록</div>
-              <div class="album-meta">
-                <b id="previewName">OP T</b> · 2025 ·
-                <span id="songCountText">0곡</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="actions">
-          <div class="play-main" id="previewPlayBtn" onclick="previewToggleMusic()">▶</div>
-          <div class="action-icon">⇄</div>
-          <div class="action-icon">＋</div>
-          <div class="action-icon">↓</div>
-          <div class="action-icon">⋯</div>
-        </div>
-
-        <div class="song-table">
-          <div class="table-head">
-            <div>#</div>
-            <div>제목</div>
-            <div>⏱</div>
+    <div class="app">
+      <div class="album-head">
+        <div class="album-info">
+          <div class="cover-wrap" id="coverWrap">
+            <img class="cover-img" id="coverImg" draggable="false">
           </div>
 
-          <div id="previewSongs"></div>
+          <div>
+            <div class="type">앨범</div>
+            <div class="album-title" id="previewTitle">EVOL</div>
+            <div class="album-meta">
+              <b id="previewName">Royal 44</b> · 2025 ·
+              <span id="songCountText">0곡</span>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div class="mini-player" id="miniPlayer" onclick="previewToggleMusic()">
-        <div class="mini-thumb" id="miniThumb"></div>
-        <div>
-          <div class="mini-title" id="miniTitle">No Song</div>
-          <div class="mini-artist" id="miniArtist">Choose music</div>
+      <div class="actions">
+        <div class="play-main" id="previewPlayBtn" onclick="previewToggleMusic()">▶</div>
+        <div class="action-icon" onclick="replayPreviewSong()">↻</div>
+        <div class="action-icon">⋯</div>
+        <div class="list-mode">목록 ☰</div>
+      </div>
+
+      <div class="song-table">
+        <div class="table-head">
+          <div>#</div>
+          <div>제목</div>
+          <div>⏱</div>
         </div>
-        <div class="mini-play" id="miniPlay">▶</div>
+
+        <div id="previewSongs"></div>
       </div>
     </div>
   </div>
@@ -551,7 +501,6 @@ $("mainImage").onchange = e => {
   reader.onload = () => {
     mainImageData = reader.result;
     $("coverImg").src = mainImageData;
-    $("miniThumb").style.backgroundImage = `url(${mainImageData})`;
     resetImagePosition();
     updatePreview();
   };
@@ -572,17 +521,12 @@ function collectSongs(){
   }).filter(song=>song.title);
 }
 
-function previewLoadSong(song, index){
+function previewLoadSong(song, index, autoPlay=false){
   if(!song) return;
 
   previewCurrentIndex = index;
   previewPlaying = false;
-
   $("previewPlayBtn").innerText = "▶";
-  $("miniPlay").innerText = "▶";
-
-  $("miniTitle").innerText = song.title || "No Song";
-  $("miniArtist").innerText = song.artist || "";
 
   if(song.youtube){
     $("youtubeBox").innerHTML = `
@@ -594,36 +538,56 @@ function previewLoadSong(song, index){
         allow="autoplay"
       ></iframe>
     `;
+  }else{
+    $("youtubeBox").innerHTML = "";
   }
 
   document.querySelectorAll(".preview-item").forEach((item, i)=>{
     item.classList.toggle("active", i === index);
   });
+
+  if(autoPlay && song.youtube){
+    setTimeout(()=>{
+      const iframe = document.getElementById("previewYt");
+      if(!iframe) return;
+
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      $("previewPlayBtn").innerText = "Ⅱ";
+      previewPlaying = true;
+    },500);
+  }
 }
 
 function previewToggleMusic(){
   const songs = collectSongs();
 
-  if(!document.getElementById("previewYt")){
-    if(songs.length){
-      previewLoadSong(songs[previewCurrentIndex] || songs[0], previewCurrentIndex || 0);
-    }
+  if(!songs.length) return;
+
+  let iframe = document.getElementById("previewYt");
+
+  if(!iframe){
+    previewLoadSong(songs[previewCurrentIndex] || songs[0], previewCurrentIndex || 0, true);
     return;
   }
-
-  const iframe = document.getElementById("previewYt");
 
   if(!previewPlaying){
     iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
     $("previewPlayBtn").innerText = "Ⅱ";
-    $("miniPlay").innerText = "Ⅱ";
     previewPlaying = true;
   }else{
     iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
     $("previewPlayBtn").innerText = "▶";
-    $("miniPlay").innerText = "▶";
     previewPlaying = false;
   }
+}
+
+function replayPreviewSong(){
+  const songs = collectSongs();
+  const song = songs[previewCurrentIndex];
+
+  if(!song) return;
+
+  previewLoadSong(song, previewCurrentIndex, true);
 }
 
 function updatePreview(){
@@ -640,7 +604,8 @@ function updatePreview(){
     item.className = "preview-item" + (index === previewCurrentIndex ? " active" : "");
 
     item.onclick = () => {
-      previewLoadSong(song, index);
+      const shouldAutoPlay = previewPlaying;
+      previewLoadSong(song, index, shouldAutoPlay);
     };
 
     item.innerHTML = `
@@ -655,8 +620,8 @@ function updatePreview(){
     $("previewSongs").appendChild(item);
   });
 
-  if(songs.length && (!$("miniTitle").innerText || $("miniTitle").innerText === "No Song")){
-    previewLoadSong(songs[0], 0);
+  if(songs.length && !document.getElementById("previewYt")){
+    previewLoadSong(songs[0], 0, false);
   }
 }
 
