@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<title>Netflix Maker</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#111;
+  color:white;
+  font-family:Arial, sans-serif;
+}
+
+.top{
+  height:64px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:0 28px;
+  background:#000;
+  border-bottom:1px solid #222;
+}
+
+.logo{
+  color:#e50914;
+  font-size:28px;
+  font-weight:900;
+  letter-spacing:-1px;
+}
+
+button{
+  background:#e50914;
+  color:white;
+  border:0;
+  padding:12px 20px;
+  border-radius:4px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+.wrap{
+  display:grid;
+  grid-template-columns:360px 1fr;
+  height:calc(100vh - 64px);
+}
+
+.panel{
+  padding:24px;
+  background:#181818;
+  border-right:1px solid #333;
+  overflow:auto;
+}
+
+label{
+  display:block;
+  margin-top:16px;
+  font-size:13px;
+  color:#bbb;
+}
+
+input, textarea{
+  width:100%;
+  margin-top:6px;
+  padding:11px;
+  background:#222;
+  border:1px solid #444;
+  color:white;
+  border-radius:4px;
+}
+
+textarea{
+  height:90px;
+  resize:none;
+}
+
+.preview-area{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:40px;
+}
+
+.netflix-screen{
+  width:960px;
+  height:540px;
+  position:relative;
+  overflow:hidden;
+  background:#000;
+  border-radius:10px;
+  box-shadow:0 20px 80px rgba(0,0,0,.7);
+}
+
+.bg{
+  position:absolute;
+  inset:0;
+  background-size:cover;
+  background-position:center;
+  opacity:.75;
+}
+
+.gradient{
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(90deg,#000 0%,rgba(0,0,0,.78) 36%,rgba(0,0,0,.12) 100%),
+    linear-gradient(0deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,0) 35%);
+}
+
+.content{
+  position:absolute;
+  left:60px;
+  top:70px;
+  width:430px;
+}
+
+.netflix-mini{
+  color:#e50914;
+  font-size:22px;
+  font-weight:900;
+  margin-bottom:34px;
+}
+
+.title{
+  font-size:58px;
+  font-weight:900;
+  line-height:.95;
+  margin-bottom:16px;
+  width:430px;
+  max-height:128px;
+  overflow:hidden;
+  word-break:keep-all;
+}
+
+.meta{
+  color:#ccc;
+  font-size:16px;
+  margin-bottom:16px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+.desc{
+  color:#eee;
+  font-size:18px;
+  line-height:1.45;
+  margin-bottom:24px;
+  width:430px;
+  max-height:130px;
+  overflow:hidden;
+  word-break:keep-all;
+}
+
+.play{
+  display:inline-block;
+  background:white;
+  color:black;
+  padding:12px 24px;
+  border-radius:4px;
+  font-weight:800;
+  max-width:240px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+</style>
+</head>
+
+<body>
+
+<div class="top">
+  <div class="logo">NETFLIX MAKER</div>
+  <button onclick="savePNG()">완성 PNG 저장</button>
+</div>
+
+<div class="wrap">
+  <div class="panel">
+    <label>배경 이미지 업로드</label>
+    <input type="file" id="imageInput" accept="image/*">
+
+    <label>작품 제목</label>
+    <input id="titleInput" value="토마토 아이스 클럽">
+
+    <label>상단 라벨</label>
+    <input id="labelInput" value="NETFLIX ORIGINAL">
+
+    <label>정보</label>
+    <input id="metaInput" value="2026 · 블랙코미디 · SF 다큐멘터리">
+
+    <label>소개 문구</label>
+    <textarea id="descInput">사막 한복판의 냉각 리조트. 손님들은 완벽한 휴식을 위해 이곳에 도착하지만, 곧 이 유토피아의 이상한 규칙을 마주한다.</textarea>
+
+    <label>버튼 문구</label>
+    <input id="buttonInput" value="▶ 재생">
+  </div>
+
+  <div class="preview-area">
+    <div class="netflix-screen" id="capture">
+      <div class="bg" id="bg"></div>
+      <div class="gradient"></div>
+
+      <div class="content">
+        <div class="netflix-mini" id="labelText">NETFLIX ORIGINAL</div>
+        <div class="title" id="titleText">토마토 아이스 클럽</div>
+        <div class="meta" id="metaText">2026 · 블랙코미디 · SF 다큐멘터리</div>
+        <div class="desc" id="descText">사막 한복판의 냉각 리조트. 손님들은 완벽한 휴식을 위해 이곳에 도착하지만, 곧 이 유토피아의 이상한 규칙을 마주한다.</div>
+        <div class="play" id="buttonText">▶ 재생</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function fitText(el, maxSize, minSize){
+  el.style.fontSize = maxSize + "px";
+
+  while(
+    (el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight) &&
+    parseFloat(el.style.fontSize) > minSize
+  ){
+    el.style.fontSize = (parseFloat(el.style.fontSize) - 1) + "px";
+  }
+}
+
+function updateAll(){
+  $("titleText").innerText = $("titleInput").value;
+  $("labelText").innerText = $("labelInput").value;
+  $("metaText").innerText = $("metaInput").value;
+  $("descText").innerText = $("descInput").value;
+  $("buttonText").innerText = $("buttonInput").value;
+
+  requestAnimationFrame(()=>{
+    fitText($("titleText"), 58, 30);
+    fitText($("descText"), 18, 13);
+  });
+}
+
+["titleInput","labelInput","metaInput","descInput","buttonInput"].forEach(id=>{
+  $(id).oninput = updateAll;
+});
+
+$("imageInput").onchange = e => {
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    $("bg").style.backgroundImage = `url(${reader.result})`;
+  };
+  reader.readAsDataURL(file);
+};
+
+function savePNG(){
+  html2canvas($("capture"), {
+    backgroundColor: null,
+    scale: 2
+  }).then(canvas => {
+    const link = document.createElement("a");
+    link.download = "netflix-maker.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+}
+
+updateAll();
+</script>
+
+</body>
+</html>
