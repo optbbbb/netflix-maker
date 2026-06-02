@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Character Music Home</title>
+
 <style>
 *{box-sizing:border-box}
 
@@ -26,8 +27,19 @@ body{
   height:430px;
   position:relative;
   background:#333;
-  background-size:cover;
-  background-position:center;
+  overflow:hidden;
+}
+
+.hero-img{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform-origin:center;
+  user-select:none;
+  pointer-events:none;
 }
 
 .hero::after{
@@ -35,8 +47,15 @@ body{
   position:absolute;
   inset:0;
   background:
-    linear-gradient(0deg,#121212 0%,rgba(18,18,18,.15) 45%,rgba(0,0,0,.25) 100%),
-    linear-gradient(90deg,rgba(0,0,0,.55),rgba(0,0,0,.05));
+    linear-gradient(
+      0deg,
+      #121212 0%,
+      rgba(18,18,18,.95) 12%,
+      rgba(18,18,18,.72) 28%,
+      rgba(18,18,18,.28) 52%,
+      rgba(18,18,18,0) 78%
+    );
+  pointer-events:none;
 }
 
 .top-icons{
@@ -44,7 +63,7 @@ body{
   top:22px;
   left:22px;
   right:22px;
-  z-index:2;
+  z-index:3;
   display:flex;
   justify-content:space-between;
   font-size:25px;
@@ -55,12 +74,13 @@ body{
   left:26px;
   right:26px;
   bottom:112px;
-  z-index:2;
+  z-index:3;
 }
 
 .song-title{
   font-size:36px;
   font-weight:900;
+  line-height:1.05;
   margin-bottom:8px;
 }
 
@@ -74,7 +94,7 @@ body{
   left:26px;
   right:26px;
   bottom:76px;
-  z-index:2;
+  z-index:3;
 }
 
 .line{
@@ -113,6 +133,7 @@ body{
   width:72px;
   height:72px;
   border-radius:50%;
+  border:0;
   background:white;
   color:black;
   display:flex;
@@ -167,6 +188,7 @@ body{
 .item-title{
   font-size:19px;
   margin-bottom:6px;
+  font-weight:800;
 }
 
 .item-artist{
@@ -178,6 +200,12 @@ body{
   margin-left:auto;
   color:#777;
   font-size:24px;
+}
+
+.empty{
+  color:#999;
+  padding:24px 0;
+  line-height:1.5;
 }
 
 .youtube-box{
@@ -192,6 +220,8 @@ body{
 
 <div class="app">
   <div class="hero" id="hero">
+    <img class="hero-img" id="heroImg" draggable="false">
+
     <div class="top-icons">
       <div>⌄</div>
       <div>✈</div>
@@ -212,11 +242,11 @@ body{
   </div>
 
   <div class="controls">
-    <div>⤨</div>
+    <div onclick="shuffleSong()">⤨</div>
     <div onclick="prevSong()">⏮</div>
-    <div class="play" id="playBtn" onclick="toggleMusic()">▶</div>
+    <button class="play" id="playBtn" onclick="toggleMusic()">▶</button>
     <div onclick="nextSong()">⏭</div>
-    <div>↻</div>
+    <div onclick="replaySong()">↻</div>
   </div>
 
   <div class="section">
@@ -240,14 +270,29 @@ if(!data.songs){
     title:"내 현재 재생목록",
     maker:"OP T",
     mainImage:"",
+    imagePosition:{
+      x:0,
+      y:0,
+      scale:1
+    },
     songs:[]
   };
 }
 
 $("siteTitle").innerText = data.title || "내 현재 재생목록";
 
-if(data.mainImage){
-  $("hero").style.backgroundImage = `url(${data.mainImage})`;
+function applyHeroImage(src, position){
+  if(!src){
+    $("heroImg").removeAttribute("src");
+    return;
+  }
+
+  $("heroImg").src = src;
+
+  const pos = position || data.imagePosition || {x:0,y:0,scale:1};
+
+  $("heroImg").style.transform =
+    `translate(${pos.x || 0}px, ${pos.y || 0}px) scale(${pos.scale || 1})`;
 }
 
 function loadSong(index){
@@ -255,18 +300,20 @@ function loadSong(index){
   isPlaying = false;
 
   const song = data.songs[current];
-  if(!song) return;
 
-  $("songTitle").innerText = song.title;
+  if(!song){
+    $("songTitle").innerText = "No Song";
+    $("artist").innerText = "Choose music";
+    renderPlaylist();
+    return;
+  }
+
+  $("songTitle").innerText = song.title || "No Song";
   $("artist").innerText = song.artist || "";
   $("duration").innerText = song.time || "2:53";
   $("playBtn").innerText = "▶";
 
-  if(song.cover){
-    $("hero").style.backgroundImage = `url(${song.cover})`;
-  }else if(data.mainImage){
-    $("hero").style.backgroundImage = `url(${data.mainImage})`;
-  }
+  applyHeroImage(song.cover || data.mainImage, data.imagePosition);
 
   $("youtubeBox").innerHTML = `
     <iframe
@@ -284,6 +331,16 @@ function loadSong(index){
 function renderPlaylist(){
   $("playlist").innerHTML = "";
 
+  if(!data.songs.length){
+    $("playlist").innerHTML = `
+      <div class="empty">
+        아직 등록된 노래가 없습니다.<br>
+        메이커에서 노래를 추가해주세요.
+      </div>
+    `;
+    return;
+  }
+
   data.songs.forEach((song, i)=>{
     const item = document.createElement("div");
     item.className = "item" + (i === current ? " active" : "");
@@ -294,7 +351,7 @@ function renderPlaylist(){
     item.innerHTML = `
       <div class="thumb" style="background-image:url('${img}')"></div>
       <div>
-        <div class="item-title">${song.title}</div>
+        <div class="item-title">${song.title || "Untitled"}</div>
         <div class="item-artist">${song.artist || ""} · ${song.time || "2:53"}</div>
       </div>
       <div class="menu">≡</div>
@@ -335,9 +392,26 @@ function prevSong(){
   loadSong(prev);
 }
 
+function shuffleSong(){
+  if(data.songs.length < 2) return;
+
+  let random = current;
+
+  while(random === current){
+    random = Math.floor(Math.random() * data.songs.length);
+  }
+
+  loadSong(random);
+}
+
+function replaySong(){
+  loadSong(current);
+}
+
 if(data.songs.length){
   loadSong(0);
 }else{
+  applyHeroImage(data.mainImage, data.imagePosition);
   renderPlaylist();
 }
 </script>
