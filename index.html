@@ -29,7 +29,6 @@ body{
   color:#e50914;
   font-size:28px;
   font-weight:900;
-  letter-spacing:-1px;
 }
 
 button{
@@ -106,57 +105,56 @@ textarea{
   position:absolute;
   inset:0;
   background:
-    linear-gradient(90deg,#000 0%,rgba(0,0,0,.78) 36%,rgba(0,0,0,.12) 100%),
-    linear-gradient(0deg,rgba(0,0,0,.45) 0%,rgba(0,0,0,0) 35%);
+    linear-gradient(90deg,#000 0%,rgba(0,0,0,.82) 35%,rgba(0,0,0,.12) 100%),
+    linear-gradient(0deg,rgba(0,0,0,.35) 0%,rgba(0,0,0,0) 38%);
 }
 
 .content{
   position:absolute;
   left:60px;
   top:70px;
-  width:430px;
+  width:450px;
+  height:390px;
 }
 
 .netflix-mini{
   color:#e50914;
   font-size:22px;
   font-weight:900;
-  margin-bottom:34px;
+  height:34px;
+  margin-bottom:20px;
+  overflow:hidden;
 }
 
 .title{
-  .title{
+  width:450px;
+  height:125px;
   font-size:58px;
   font-weight:900;
-  line-height:1.2;
-  margin-bottom:16px;
-
-  width:430px;
-  min-height:70px;
-
-  overflow:visible;
+  line-height:1.12;
+  margin-bottom:14px;
+  overflow:hidden;
   word-break:keep-all;
-  white-space:normal;
-
-  padding-bottom:10px;
 }
 
 .meta{
+  width:450px;
+  height:28px;
   color:#ccc;
   font-size:16px;
-  margin-bottom:16px;
+  margin-bottom:14px;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
 }
 
 .desc{
+  width:450px;
+  height:115px;
   color:#eee;
   font-size:18px;
   line-height:1.45;
-  margin-bottom:24px;
-  width:430px;
-  max-height:130px;
+  margin-bottom:22px;
   overflow:hidden;
   word-break:keep-all;
 }
@@ -226,11 +224,14 @@ const $ = id => document.getElementById(id);
 function fitText(el, maxSize, minSize){
   el.style.fontSize = maxSize + "px";
 
+  let size = maxSize;
+
   while(
-    (el.scrollWidth > el.clientWidth || el.scrollHeight > el.clientHeight) &&
-    parseFloat(el.style.fontSize) > minSize
+    (el.scrollHeight > el.clientHeight || el.scrollWidth > el.clientWidth) &&
+    size > minSize
   ){
-    el.style.fontSize = (parseFloat(el.style.fontSize) - 1) + "px";
+    size -= 1;
+    el.style.fontSize = size + "px";
   }
 }
 
@@ -242,8 +243,8 @@ function updateAll(){
   $("buttonText").innerText = $("buttonInput").value;
 
   requestAnimationFrame(()=>{
-    fitText($("titleText"), 58, 30);
-    fitText($("descText"), 18, 13);
+    fitText($("titleText"), 58, 24);
+    fitText($("descText"), 18, 12);
   });
 }
 
@@ -263,31 +264,26 @@ $("imageInput").onchange = e => {
 };
 
 function savePNG(){
-
   document.fonts.ready.then(()=>{
+    updateAll();
 
-    html2canvas($("capture"),{
-      backgroundColor:null,
-      scale:3,
-      useCORS:true,
-      logging:false,
-      scrollX:0,
-      scrollY:0
-    }).then(canvas=>{
-
-      const link=document.createElement("a");
-
-      link.download="netflix-maker.png";
-      link.href=canvas.toDataURL("image/png");
-
-      link.click();
-
-    });
-
+    setTimeout(()=>{
+      html2canvas($("capture"),{
+        backgroundColor:null,
+        scale:3,
+        useCORS:true,
+        logging:false,
+        scrollX:0,
+        scrollY:0
+      }).then(canvas=>{
+        const link=document.createElement("a");
+        link.download="netflix-maker.png";
+        link.href=canvas.toDataURL("image/png");
+        link.click();
+      });
+    },100);
   });
-
 }
- 
 
 updateAll();
 </script>
