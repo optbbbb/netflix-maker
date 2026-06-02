@@ -2,10 +2,14 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>Character Music Home</title>
+<title>Music Home Player</title>
 
 <style>
 *{box-sizing:border-box}
+
+:root{
+  --accent:#1DB954;
+}
 
 body{
   margin:0;
@@ -17,23 +21,34 @@ body{
 }
 
 .app{
-  width:430px;
+  width:min(100%,460px);
   min-height:100vh;
   background:#121212;
   overflow:hidden;
 }
 
-.hero{
-  height:430px;
-  position:relative;
-  background:#333;
-  overflow:hidden;
+.album-head{
+  padding:28px 26px 24px;
+  background:
+    linear-gradient(180deg,rgba(255,255,255,.22),rgba(18,18,18,.96) 88%);
 }
 
-.hero-img{
-  position:absolute;
-  left:0;
-  top:0;
+.album-info{
+  display:flex;
+  align-items:flex-end;
+  gap:20px;
+}
+
+.cover-wrap{
+  width:132px;
+  height:132px;
+  background:#333;
+  flex-shrink:0;
+  overflow:hidden;
+  box-shadow:0 12px 35px rgba(0,0,0,.45);
+}
+
+.cover-img{
   width:100%;
   height:100%;
   object-fit:cover;
@@ -42,99 +57,258 @@ body{
   pointer-events:none;
 }
 
-.hero::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:
-    linear-gradient(
-      0deg,
-      #121212 0%,
-      rgba(18,18,18,.95) 12%,
-      rgba(18,18,18,.72) 28%,
-      rgba(18,18,18,.28) 52%,
-      rgba(18,18,18,0) 78%
-    );
-  pointer-events:none;
-}
-
-.top-icons{
-  position:absolute;
-  top:22px;
-  left:22px;
-  right:22px;
-  z-index:3;
-  display:flex;
-  justify-content:space-between;
-  font-size:25px;
-}
-
-.now{
-  position:absolute;
-  left:26px;
-  right:26px;
-  bottom:112px;
-  z-index:3;
-}
-
-.song-title{
-  font-size:36px;
+.type{
+  font-size:12px;
   font-weight:900;
-  line-height:1.05;
+  color:#eee;
   margin-bottom:8px;
 }
 
-.artist{
-  font-size:20px;
+.album-title{
+  font-size:42px;
+  font-weight:900;
+  line-height:.95;
+  margin-bottom:10px;
+  word-break:keep-all;
+}
+
+.album-meta{
+  font-size:14px;
   color:#ddd;
+  line-height:1.45;
 }
 
-.progress{
-  position:absolute;
-  left:26px;
-  right:26px;
-  bottom:76px;
-  z-index:3;
+.actions{
+  display:flex;
+  align-items:center;
+  gap:22px;
+  padding:18px 26px 8px;
 }
 
-.line{
-  height:5px;
-  background:rgba(255,255,255,.35);
-  border-radius:99px;
-  position:relative;
+.play-main{
+  width:54px;
+  height:54px;
+  border-radius:50%;
+  background:var(--accent);
+  color:black;
+  border:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:25px;
+  font-weight:900;
+  cursor:pointer;
 }
 
-.line::before{
-  content:"";
-  position:absolute;
-  width:22%;
-  height:100%;
-  background:white;
-  border-radius:99px;
+.action-icon{
+  color:#bbb;
+  font-size:25px;
+  cursor:pointer;
+}
+
+.action-icon:hover{
+  color:white;
+}
+
+.list-mode{
+  margin-left:auto;
+  color:#aaa;
+  font-size:14px;
+  font-weight:800;
+}
+
+.song-table{
+  padding:8px 26px 120px;
+}
+
+.table-head{
+  display:grid;
+  grid-template-columns:34px 1fr 54px;
+  color:#999;
+  font-size:13px;
+  padding:10px 0;
+  border-bottom:1px solid #2a2a2a;
+}
+
+.song-item{
+  display:grid;
+  grid-template-columns:34px 1fr 54px;
+  align-items:center;
+  padding:12px 0;
+  border-radius:8px;
+  cursor:pointer;
+}
+
+.song-item:hover{
+  background:#1b1b1b;
+  margin:0 -8px;
+  padding:12px 8px;
+}
+
+.song-item.active{
+  background:#242424;
+  margin:0 -8px;
+  padding:12px 8px;
+}
+
+.index{
+  color:#aaa;
+  font-size:15px;
+}
+
+.song-title{
+  font-size:15px;
+  font-weight:900;
+}
+
+.song-artist{
+  margin-top:4px;
+  color:#999;
+  font-size:13px;
 }
 
 .time{
-  display:flex;
-  justify-content:space-between;
-  margin-top:8px;
-  font-size:15px;
-  color:#ddd;
+  color:#aaa;
+  font-size:13px;
+  text-align:right;
 }
 
-.controls{
-  height:118px;
+.mini-player{
+  position:fixed;
+  left:50%;
+  bottom:18px;
+  transform:translateX(-50%);
+  width:min(430px,calc(100% - 24px));
+  background:#242424;
+  border:1px solid #333;
+  border-radius:12px;
+  padding:10px;
+  display:grid;
+  grid-template-columns:48px 1fr 42px;
+  align-items:center;
+  gap:10px;
+  z-index:20;
+  box-shadow:0 12px 40px rgba(0,0,0,.45);
+  cursor:pointer;
+}
+
+.mini-thumb{
+  width:48px;
+  height:48px;
+  background:#333;
+  background-size:cover;
+  background-position:center;
+}
+
+.mini-title{
+  font-size:14px;
+  font-weight:900;
+}
+
+.mini-artist{
+  color:#aaa;
+  font-size:12px;
+  margin-top:4px;
+}
+
+.mini-play{
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  background:var(--accent);
+  color:black;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:900;
+}
+
+.full-player{
+  position:fixed;
+  inset:0;
+  background:#121212;
+  z-index:50;
+  transform:translateY(100%);
+  transition:.35s ease;
+  display:flex;
+  justify-content:center;
+}
+
+.full-player.open{
+  transform:translateY(0);
+}
+
+.full-inner{
+  width:min(100%,460px);
+  padding:24px;
+}
+
+.close{
+  font-size:28px;
+  cursor:pointer;
+  margin-bottom:24px;
+}
+
+.full-cover{
+  width:100%;
+  aspect-ratio:1/1;
+  background:#333;
+  background-size:cover;
+  background-position:center;
+  border-radius:10px;
+  box-shadow:0 20px 60px rgba(0,0,0,.45);
+  margin-bottom:28px;
+}
+
+.full-title{
+  font-size:28px;
+  font-weight:900;
+}
+
+.full-artist{
+  color:#aaa;
+  font-size:17px;
+  margin-top:8px;
+}
+
+.progress{
+  margin:28px 0 18px;
+}
+
+.progress-line{
+  height:5px;
+  background:#444;
+  border-radius:999px;
+  overflow:hidden;
+}
+
+.progress-fill{
+  width:22%;
+  height:100%;
+  background:white;
+}
+
+.progress-time{
+  display:flex;
+  justify-content:space-between;
+  color:#aaa;
+  font-size:13px;
+  margin-top:8px;
+}
+
+.full-controls{
   display:flex;
   justify-content:space-around;
   align-items:center;
   font-size:30px;
+  margin-top:20px;
 }
 
-.play{
+.full-play{
   width:72px;
   height:72px;
   border-radius:50%;
-  border:0;
-  background:white;
+  background:var(--accent);
   color:black;
   display:flex;
   align-items:center;
@@ -144,67 +318,9 @@ body{
   cursor:pointer;
 }
 
-.section{
-  padding:22px 22px 44px;
-  border-top:1px solid rgba(255,255,255,.06);
-}
-
-.caption{
-  color:#aaa;
-  font-size:15px;
-  margin-bottom:4px;
-}
-
-.playlist-title{
-  font-size:25px;
-  font-weight:900;
-  margin-bottom:20px;
-}
-
-.item{
-  display:flex;
-  align-items:center;
-  gap:15px;
-  padding:12px 0;
-  cursor:pointer;
-}
-
-.item.active{
-  background:#202020;
-  margin:0 -10px;
-  padding:12px 10px;
-  border-radius:8px;
-}
-
-.thumb{
-  width:58px;
-  height:58px;
-  background:#333;
-  background-size:cover;
-  background-position:center;
-  flex-shrink:0;
-}
-
-.item-title{
-  font-size:19px;
-  margin-bottom:6px;
-  font-weight:800;
-}
-
-.item-artist{
-  color:#999;
-  font-size:15px;
-}
-
-.menu{
-  margin-left:auto;
-  color:#777;
-  font-size:24px;
-}
-
 .empty{
-  color:#999;
-  padding:24px 0;
+  color:#aaa;
+  padding:30px 0;
   line-height:1.5;
 }
 
@@ -213,46 +329,100 @@ body{
   height:0;
   overflow:hidden;
 }
+
+@media(max-width:520px){
+  .app{
+    width:100%;
+  }
+
+  .album-info{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .cover-wrap{
+    width:148px;
+    height:148px;
+  }
+
+  .album-title{
+    font-size:38px;
+  }
+}
 </style>
 </head>
 
 <body>
 
 <div class="app">
-  <div class="hero" id="hero">
-    <img class="hero-img" id="heroImg" draggable="false">
+  <div class="album-head">
+    <div class="album-info">
+      <div class="cover-wrap">
+        <img class="cover-img" id="coverImg" draggable="false">
+      </div>
 
-    <div class="top-icons">
-      <div>⌄</div>
-      <div>✈</div>
-    </div>
-
-    <div class="now">
-      <div class="song-title" id="songTitle">No Song</div>
-      <div class="artist" id="artist">Choose music</div>
-    </div>
-
-    <div class="progress">
-      <div class="line"></div>
-      <div class="time">
-        <span>0:31</span>
-        <span id="duration">2:53</span>
+      <div>
+        <div class="type">앨범</div>
+        <div class="album-title" id="albumTitle">EVOL</div>
+        <div class="album-meta">
+          <b id="artistName">Royal 44</b> · 2025 ·
+          <span id="songCount">0곡</span>
+        </div>
       </div>
     </div>
   </div>
 
-  <div class="controls">
-    <div onclick="shuffleSong()">⤨</div>
-    <div onclick="prevSong()">⏮</div>
-    <button class="play" id="playBtn" onclick="toggleMusic()">▶</button>
-    <div onclick="nextSong()">⏭</div>
-    <div onclick="replaySong()">↻</div>
+  <div class="actions">
+    <button class="play-main" id="mainPlay" onclick="toggleMusic()">▶</button>
+    <div class="action-icon" onclick="replaySong()">↻</div>
+    <div class="action-icon">⋯</div>
+    <div class="list-mode">목록 ☰</div>
   </div>
 
-  <div class="section">
-    <div class="caption">재생 중인 트랙 출처</div>
-    <div class="playlist-title" id="siteTitle">내 현재 재생목록</div>
-    <div id="playlist"></div>
+  <div class="song-table">
+    <div class="table-head">
+      <div>#</div>
+      <div>제목</div>
+      <div>⏱</div>
+    </div>
+
+    <div id="songList"></div>
+  </div>
+</div>
+
+<div class="mini-player" id="miniPlayer" onclick="openFullPlayer()">
+  <div class="mini-thumb" id="miniThumb"></div>
+  <div>
+    <div class="mini-title" id="miniTitle">No Song</div>
+    <div class="mini-artist" id="miniArtist">Choose music</div>
+  </div>
+  <div class="mini-play" id="miniPlay" onclick="event.stopPropagation(); toggleMusic();">▶</div>
+</div>
+
+<div class="full-player" id="fullPlayer">
+  <div class="full-inner">
+    <div class="close" onclick="closeFullPlayer()">⌄</div>
+
+    <div class="full-cover" id="fullCover"></div>
+
+    <div class="full-title" id="fullTitle">No Song</div>
+    <div class="full-artist" id="fullArtist">Choose music</div>
+
+    <div class="progress">
+      <div class="progress-line">
+        <div class="progress-fill"></div>
+      </div>
+      <div class="progress-time">
+        <span>0:31</span>
+        <span id="fullDuration">2:53</span>
+      </div>
+    </div>
+
+    <div class="full-controls">
+      <div onclick="prevSong()">⏮</div>
+      <div class="full-play" id="fullPlay" onclick="toggleMusic()">▶</div>
+      <div onclick="nextSong()">⏭</div>
+    </div>
   </div>
 </div>
 
@@ -267,53 +437,86 @@ let isPlaying = false;
 
 if(!data.songs){
   data = {
-    title:"내 현재 재생목록",
-    maker:"OP T",
+    title:"EVOL",
+    maker:"Royal 44",
+    accentColor:"#1DB954",
     mainImage:"",
-    imagePosition:{
-      x:0,
-      y:0,
-      scale:1
-    },
+    imagePosition:{x:0,y:0,scale:1},
     songs:[]
   };
 }
 
-$("siteTitle").innerText = data.title || "내 현재 재생목록";
+document.documentElement.style.setProperty("--accent", data.accentColor || "#1DB954");
 
-function applyHeroImage(src, position){
-  if(!src){
-    $("heroImg").removeAttribute("src");
+$("albumTitle").innerText = data.title || "EVOL";
+$("artistName").innerText = data.maker || "Royal 44";
+$("songCount").innerText = (data.songs || []).length + "곡";
+
+function applyCover(){
+  if(!data.mainImage) return;
+
+  $("coverImg").src = data.mainImage;
+
+  const pos = data.imagePosition || {x:0,y:0,scale:1};
+  $("coverImg").style.transform =
+    `translate(${pos.x || 0}px, ${pos.y || 0}px) scale(${pos.scale || 1})`;
+
+  $("miniThumb").style.backgroundImage = `url(${data.mainImage})`;
+  $("fullCover").style.backgroundImage = `url(${data.mainImage})`;
+}
+
+function renderSongs(){
+  $("songList").innerHTML = "";
+
+  if(!data.songs.length){
+    $("songList").innerHTML = `
+      <div class="empty">
+        등록된 노래가 없습니다.<br>
+        메이커에서 노래를 추가해주세요.
+      </div>
+    `;
     return;
   }
 
-  $("heroImg").src = src;
+  data.songs.forEach((song,index)=>{
+    const item = document.createElement("div");
+    item.className = "song-item" + (index === current ? " active" : "");
 
-  const pos = position || data.imagePosition || {x:0,y:0,scale:1};
+    item.onclick = () => {
+      const wasPlaying = isPlaying;
+      loadSong(index, wasPlaying);
+    };
 
-  $("heroImg").style.transform =
-    `translate(${pos.x || 0}px, ${pos.y || 0}px) scale(${pos.scale || 1})`;
+    item.innerHTML = `
+      <div class="index">${index + 1}</div>
+      <div>
+        <div class="song-title">${song.title}</div>
+        <div class="song-artist">${song.artist}</div>
+      </div>
+      <div class="time">${song.time || "2:53"}</div>
+    `;
+
+    $("songList").appendChild(item);
+  });
 }
 
-function loadSong(index){
+function loadSong(index, autoPlay=false){
+  if(!data.songs.length) return;
+
   current = index;
   isPlaying = false;
 
   const song = data.songs[current];
 
-  if(!song){
-    $("songTitle").innerText = "No Song";
-    $("artist").innerText = "Choose music";
-    renderPlaylist();
-    return;
-  }
+  $("miniTitle").innerText = song.title || "No Song";
+  $("miniArtist").innerText = song.artist || "";
+  $("fullTitle").innerText = song.title || "No Song";
+  $("fullArtist").innerText = song.artist || "";
+  $("fullDuration").innerText = song.time || "2:53";
 
-  $("songTitle").innerText = song.title || "No Song";
-  $("artist").innerText = song.artist || "";
-  $("duration").innerText = song.time || "2:53";
-  $("playBtn").innerText = "▶";
-
-  applyHeroImage(song.cover || data.mainImage, data.imagePosition);
+  $("mainPlay").innerText = "▶";
+  $("miniPlay").innerText = "▶";
+  $("fullPlay").innerText = "▶";
 
   $("youtubeBox").innerHTML = `
     <iframe
@@ -325,94 +528,84 @@ function loadSong(index){
     ></iframe>
   `;
 
-  renderPlaylist();
+  renderSongs();
+
+  if(autoPlay){
+    setTimeout(()=>{
+      playMusic();
+    },500);
+  }
 }
 
-function renderPlaylist(){
-  $("playlist").innerHTML = "";
+function playMusic(){
+  const iframe = document.getElementById("yt");
+  if(!iframe) return;
 
-  if(!data.songs.length){
-    $("playlist").innerHTML = `
-      <div class="empty">
-        아직 등록된 노래가 없습니다.<br>
-        메이커에서 노래를 추가해주세요.
-      </div>
-    `;
-    return;
-  }
+  iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
 
-  data.songs.forEach((song, i)=>{
-    const item = document.createElement("div");
-    item.className = "item" + (i === current ? " active" : "");
-    item.onclick = () => loadSong(i);
+  isPlaying = true;
+  $("mainPlay").innerText = "Ⅱ";
+  $("miniPlay").innerText = "Ⅱ";
+  $("fullPlay").innerText = "Ⅱ";
+}
 
-    const img = song.cover || data.mainImage || "";
+function pauseMusic(){
+  const iframe = document.getElementById("yt");
+  if(!iframe) return;
 
-    item.innerHTML = `
-      <div class="thumb" style="background-image:url('${img}')"></div>
-      <div>
-        <div class="item-title">${song.title || "Untitled"}</div>
-        <div class="item-artist">${song.artist || ""} · ${song.time || "2:53"}</div>
-      </div>
-      <div class="menu">≡</div>
-    `;
+  iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
 
-    $("playlist").appendChild(item);
-  });
+  isPlaying = false;
+  $("mainPlay").innerText = "▶";
+  $("miniPlay").innerText = "▶";
+  $("fullPlay").innerText = "▶";
 }
 
 function toggleMusic(){
-  const iframe = document.getElementById("yt");
+  if(!data.songs.length) return;
 
-  if(!iframe){
-    if(data.songs.length) loadSong(0);
+  if(!document.getElementById("yt")){
+    loadSong(current, true);
     return;
   }
 
-  if(!isPlaying){
-    iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-    $("playBtn").innerText = "Ⅱ";
-    isPlaying = true;
+  if(isPlaying){
+    pauseMusic();
   }else{
-    iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-    $("playBtn").innerText = "▶";
-    isPlaying = false;
+    playMusic();
   }
+}
+
+function replaySong(){
+  if(!data.songs.length) return;
+  loadSong(current, true);
 }
 
 function nextSong(){
   if(!data.songs.length) return;
   const next = (current + 1) % data.songs.length;
-  loadSong(next);
+  loadSong(next, isPlaying);
 }
 
 function prevSong(){
   if(!data.songs.length) return;
   const prev = (current - 1 + data.songs.length) % data.songs.length;
-  loadSong(prev);
+  loadSong(prev, isPlaying);
 }
 
-function shuffleSong(){
-  if(data.songs.length < 2) return;
-
-  let random = current;
-
-  while(random === current){
-    random = Math.floor(Math.random() * data.songs.length);
-  }
-
-  loadSong(random);
+function openFullPlayer(){
+  $("fullPlayer").classList.add("open");
 }
 
-function replaySong(){
-  loadSong(current);
+function closeFullPlayer(){
+  $("fullPlayer").classList.remove("open");
 }
+
+applyCover();
+renderSongs();
 
 if(data.songs.length){
-  loadSong(0);
-}else{
-  applyHeroImage(data.mainImage, data.imagePosition);
-  renderPlaylist();
+  loadSong(0,false);
 }
 </script>
 
