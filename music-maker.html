@@ -2,13 +2,14 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>Character Music Maker</title>
+<title>Character Music Home Maker</title>
+
 <style>
 *{box-sizing:border-box}
 
 body{
   margin:0;
-  background:#111;
+  background:#101010;
   color:white;
   font-family:Arial, sans-serif;
 }
@@ -16,13 +17,14 @@ body{
 .wrap{
   min-height:100vh;
   display:grid;
-  grid-template-columns:380px 1fr;
+  grid-template-columns:390px 1fr;
 }
 
 .panel{
   padding:28px;
   background:#181818;
   overflow:auto;
+  height:100vh;
 }
 
 h1{
@@ -69,15 +71,15 @@ button{
 }
 
 .song{
-  margin-top:16px;
-  padding:14px;
+  margin-top:18px;
+  padding:16px;
   background:#202020;
   border:1px solid #333;
-  border-radius:14px;
+  border-radius:16px;
 }
 
 .remove{
-  background:#5a1e1e;
+  background:#672020;
   color:white;
   padding:10px;
 }
@@ -95,7 +97,7 @@ button{
   background:#121212;
   border-radius:34px;
   overflow:hidden;
-  box-shadow:0 25px 80px rgba(0,0,0,.55);
+  box-shadow:0 25px 90px rgba(0,0,0,.65);
 }
 
 .hero{
@@ -126,20 +128,30 @@ button{
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(0deg,#121212 0%,rgba(0,0,0,.12) 60%);
+  background:
+    linear-gradient(
+      0deg,
+      #121212 0%,
+      rgba(18,18,18,.95) 12%,
+      rgba(18,18,18,.72) 28%,
+      rgba(18,18,18,.28) 52%,
+      rgba(18,18,18,0) 78%
+    );
   pointer-events:none;
 }
 
 .hero-text{
   position:absolute;
   left:24px;
-  bottom:38px;
+  right:24px;
+  bottom:58px;
   z-index:2;
 }
 
 .hero-title{
   font-size:34px;
   font-weight:900;
+  line-height:1.1;
 }
 
 .hero-sub{
@@ -171,11 +183,11 @@ button{
 }
 
 .list{
-  padding:20px;
+  padding:20px 22px;
 }
 
 .list-title{
-  font-size:22px;
+  font-size:23px;
   font-weight:900;
   margin-bottom:16px;
 }
@@ -193,17 +205,22 @@ button{
   background:#333;
   background-size:cover;
   background-position:center;
+  flex-shrink:0;
 }
 
 .item-name{
   font-size:18px;
-  font-weight:700;
+  font-weight:800;
 }
 
 .item-artist{
   color:#aaa;
   font-size:14px;
   margin-top:4px;
+}
+
+.result{
+  margin-top:20px;
 }
 </style>
 </head>
@@ -234,13 +251,14 @@ button{
     <button class="make" onclick="makeHome()">홈피 만들기</button>
 
     <label>완성 링크</label>
-    <input id="resultLink" readonly>
+    <input class="result" id="resultLink" readonly>
   </div>
 
   <div class="preview">
     <div class="phone">
       <div class="hero" id="previewHero">
         <img class="hero-img" id="heroImg" draggable="false">
+
         <div class="hero-text">
           <div class="hero-title" id="previewTitle">내 현재 재생목록</div>
           <div class="hero-sub" id="previewName">OP T</div>
@@ -279,12 +297,15 @@ let startImgY = 0;
 
 function getYoutubeId(url){
   if(!url) return "";
+
   if(url.includes("youtube.com/watch?v=")){
     return url.split("v=")[1].split("&")[0];
   }
+
   if(url.includes("youtu.be/")){
     return url.split("youtu.be/")[1].split("?")[0];
   }
+
   return url.trim();
 }
 
@@ -325,6 +346,7 @@ function resetImagePosition(){
   imgX = 0;
   imgY = 0;
   imgScale = 1;
+
   $("imageScale").value = 1;
   applyImageTransform();
 }
@@ -363,10 +385,12 @@ function addSong(){
     if(!file) return;
 
     const reader = new FileReader();
+
     reader.onload = () => {
       fileInput.dataset.image = reader.result;
       updatePreview();
     };
+
     reader.readAsDataURL(file);
   };
 
@@ -385,12 +409,14 @@ $("mainImage").onchange = e => {
   if(!file) return;
 
   const reader = new FileReader();
+
   reader.onload = () => {
     mainImageData = reader.result;
     $("heroImg").src = mainImageData;
     resetImagePosition();
     updatePreview();
   };
+
   reader.readAsDataURL(file);
 };
 
@@ -413,11 +439,13 @@ function updatePreview(){
   $("previewName").innerText = $("homeName").value;
 
   const songs = collectSongs();
+
   $("previewSongs").innerHTML = "";
 
   songs.forEach(song=>{
     const item = document.createElement("div");
     item.className = "item";
+
     item.innerHTML = `
       <div class="thumb" style="background-image:url('${song.cover || ""}')"></div>
       <div>
@@ -425,6 +453,7 @@ function updatePreview(){
         <div class="item-artist">${song.artist} · ${song.time}</div>
       </div>
     `;
+
     $("previewSongs").appendChild(item);
   });
 }
@@ -444,7 +473,10 @@ function makeHome(){
 
   localStorage.setItem("musicHomeData", JSON.stringify(data));
 
-  const base = location.href.replace("index.html","").replace("music-maker.html","");
+  const base = location.href
+    .replace("index.html","")
+    .replace("music-maker.html","");
+
   const url = base + "player.html";
 
   $("resultLink").value = url;
