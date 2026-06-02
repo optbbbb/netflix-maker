@@ -101,16 +101,33 @@ button{
 .hero{
   height:390px;
   background:#333;
-  background-size:cover;
-  background-position:center;
   position:relative;
+  overflow:hidden;
+  cursor:grab;
+}
+
+.hero:active{
+  cursor:grabbing;
+}
+
+.hero-img{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform-origin:center;
+  user-select:none;
+  pointer-events:none;
 }
 
 .hero::after{
   content:"";
   position:absolute;
   inset:0;
-  background:linear-gradient(0deg,#121212 0%,rgba(0,0,0,.1) 60%);
+  background:linear-gradient(0deg,#121212 0%,rgba(0,0,0,.12) 60%);
+  pointer-events:none;
 }
 
 .hero-text{
@@ -206,6 +223,11 @@ button{
     <label>메인 캐릭터 이미지</label>
     <input type="file" id="mainImage" accept="image/*">
 
+    <label>이미지 확대</label>
+    <input type="range" id="imageScale" min="1" max="2.5" step="0.01" value="1">
+
+    <button class="add" onclick="resetImagePosition()">이미지 위치 초기화</button>
+
     <div id="songList"></div>
 
     <button class="add" onclick="addSong()">+ 노래 추가</button>
@@ -218,6 +240,7 @@ button{
   <div class="preview">
     <div class="phone">
       <div class="hero" id="previewHero">
+        <img class="hero-img" id="heroImg" draggable="false">
         <div class="hero-text">
           <div class="hero-title" id="previewTitle">내 현재 재생목록</div>
           <div class="hero-sub" id="previewName">OP T</div>
@@ -244,6 +267,16 @@ const $ = id => document.getElementById(id);
 let mainImageData = "";
 let songIndex = 0;
 
+let imgX = 0;
+let imgY = 0;
+let imgScale = 1;
+
+let dragging = false;
+let startX = 0;
+let startY = 0;
+let startImgX = 0;
+let startImgY = 0;
+
 function getYoutubeId(url){
   if(!url) return "";
   if(url.includes("youtube.com/watch?v=")){
@@ -253,6 +286,47 @@ function getYoutubeId(url){
     return url.split("youtu.be/")[1].split("?")[0];
   }
   return url.trim();
+}
+
+function applyImageTransform(){
+  $("heroImg").style.transform =
+    `translate(${imgX}px, ${imgY}px) scale(${imgScale})`;
+}
+
+$("previewHero").addEventListener("mousedown", e=>{
+  if(!mainImageData) return;
+
+  dragging = true;
+  startX = e.clientX;
+  startY = e.clientY;
+  startImgX = imgX;
+  startImgY = imgY;
+});
+
+window.addEventListener("mousemove", e=>{
+  if(!dragging) return;
+
+  imgX = startImgX + (e.clientX - startX);
+  imgY = startImgY + (e.clientY - startY);
+
+  applyImageTransform();
+});
+
+window.addEventListener("mouseup", ()=>{
+  dragging = false;
+});
+
+$("imageScale").oninput = e=>{
+  imgScale = parseFloat(e.target.value);
+  applyImageTransform();
+};
+
+function resetImagePosition(){
+  imgX = 0;
+  imgY = 0;
+  imgScale = 1;
+  $("imageScale").value = 1;
+  applyImageTransform();
 }
 
 function addSong(){
@@ -283,6 +357,7 @@ function addSong(){
   $("songList").appendChild(box);
 
   const fileInput = box.querySelector(".song-cover");
+
   fileInput.onchange = e => {
     const file = e.target.files[0];
     if(!file) return;
@@ -312,7 +387,8 @@ $("mainImage").onchange = e => {
   const reader = new FileReader();
   reader.onload = () => {
     mainImageData = reader.result;
-    $("previewHero").style.backgroundImage = `url(${mainImageData})`;
+    $("heroImg").src = mainImageData;
+    resetImagePosition();
     updatePreview();
   };
   reader.readAsDataURL(file);
@@ -358,12 +434,17 @@ function makeHome(){
     title: $("homeTitle").value,
     maker: $("homeName").value,
     mainImage: mainImageData,
+    imagePosition:{
+      x: imgX,
+      y: imgY,
+      scale: imgScale
+    },
     songs: collectSongs().filter(song=>song.youtube)
   };
 
   localStorage.setItem("musicHomeData", JSON.stringify(data));
 
-  const base = location.href.replace("index.html","");
+  const base = location.href.replace("index.html","").replace("music-maker.html","");
   const url = base + "player.html";
 
   $("resultLink").value = url;
