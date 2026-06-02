@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Character Music Home</title>
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#050505;
+  color:white;
+  font-family:Arial, sans-serif;
+  display:flex;
+  justify-content:center;
+}
+
+.app{
+  width:430px;
+  min-height:100vh;
+  background:#121212;
+  overflow:hidden;
+}
+
+.hero{
+  height:430px;
+  position:relative;
+  background:#333;
+  background-size:cover;
+  background-position:center;
+}
+
+.hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(0deg,#121212 0%,rgba(18,18,18,.15) 45%,rgba(0,0,0,.25) 100%),
+    linear-gradient(90deg,rgba(0,0,0,.55),rgba(0,0,0,.05));
+}
+
+.top-icons{
+  position:absolute;
+  top:22px;
+  left:22px;
+  right:22px;
+  z-index:2;
+  display:flex;
+  justify-content:space-between;
+  font-size:25px;
+}
+
+.now{
+  position:absolute;
+  left:26px;
+  right:26px;
+  bottom:112px;
+  z-index:2;
+}
+
+.song-title{
+  font-size:36px;
+  font-weight:900;
+  margin-bottom:8px;
+}
+
+.artist{
+  font-size:20px;
+  color:#ddd;
+}
+
+.progress{
+  position:absolute;
+  left:26px;
+  right:26px;
+  bottom:76px;
+  z-index:2;
+}
+
+.line{
+  height:5px;
+  background:rgba(255,255,255,.35);
+  border-radius:99px;
+  position:relative;
+}
+
+.line::before{
+  content:"";
+  position:absolute;
+  width:22%;
+  height:100%;
+  background:white;
+  border-radius:99px;
+}
+
+.time{
+  display:flex;
+  justify-content:space-between;
+  margin-top:8px;
+  font-size:15px;
+  color:#ddd;
+}
+
+.controls{
+  height:118px;
+  display:flex;
+  justify-content:space-around;
+  align-items:center;
+  font-size:30px;
+}
+
+.play{
+  width:72px;
+  height:72px;
+  border-radius:50%;
+  background:white;
+  color:black;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:34px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.section{
+  padding:22px 22px 44px;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+
+.caption{
+  color:#aaa;
+  font-size:15px;
+  margin-bottom:4px;
+}
+
+.playlist-title{
+  font-size:25px;
+  font-weight:900;
+  margin-bottom:20px;
+}
+
+.item{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  padding:12px 0;
+  cursor:pointer;
+}
+
+.item.active{
+  background:#202020;
+  margin:0 -10px;
+  padding:12px 10px;
+  border-radius:8px;
+}
+
+.thumb{
+  width:58px;
+  height:58px;
+  background:#333;
+  background-size:cover;
+  background-position:center;
+  flex-shrink:0;
+}
+
+.item-title{
+  font-size:19px;
+  margin-bottom:6px;
+}
+
+.item-artist{
+  color:#999;
+  font-size:15px;
+}
+
+.menu{
+  margin-left:auto;
+  color:#777;
+  font-size:24px;
+}
+
+.youtube-box{
+  width:0;
+  height:0;
+  overflow:hidden;
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+  <div class="hero" id="hero">
+    <div class="top-icons">
+      <div>⌄</div>
+      <div>✈</div>
+    </div>
+
+    <div class="now">
+      <div class="song-title" id="songTitle">No Song</div>
+      <div class="artist" id="artist">Choose music</div>
+    </div>
+
+    <div class="progress">
+      <div class="line"></div>
+      <div class="time">
+        <span>0:31</span>
+        <span id="duration">2:53</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div>⤨</div>
+    <div onclick="prevSong()">⏮</div>
+    <div class="play" id="playBtn" onclick="toggleMusic()">▶</div>
+    <div onclick="nextSong()">⏭</div>
+    <div>↻</div>
+  </div>
+
+  <div class="section">
+    <div class="caption">재생 중인 트랙 출처</div>
+    <div class="playlist-title" id="siteTitle">내 현재 재생목록</div>
+    <div id="playlist"></div>
+  </div>
+</div>
+
+<div class="youtube-box" id="youtubeBox"></div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+let data = JSON.parse(localStorage.getItem("musicHomeData") || "{}");
+let current = 0;
+let isPlaying = false;
+
+if(!data.songs){
+  data = {
+    title:"내 현재 재생목록",
+    maker:"OP T",
+    mainImage:"",
+    songs:[]
+  };
+}
+
+$("siteTitle").innerText = data.title || "내 현재 재생목록";
+
+if(data.mainImage){
+  $("hero").style.backgroundImage = `url(${data.mainImage})`;
+}
+
+function loadSong(index){
+  current = index;
+  isPlaying = false;
+
+  const song = data.songs[current];
+  if(!song) return;
+
+  $("songTitle").innerText = song.title;
+  $("artist").innerText = song.artist || "";
+  $("duration").innerText = song.time || "2:53";
+  $("playBtn").innerText = "▶";
+
+  if(song.cover){
+    $("hero").style.backgroundImage = `url(${song.cover})`;
+  }else if(data.mainImage){
+    $("hero").style.backgroundImage = `url(${data.mainImage})`;
+  }
+
+  $("youtubeBox").innerHTML = `
+    <iframe
+      id="yt"
+      width="1"
+      height="1"
+      src="https://www.youtube.com/embed/${song.youtube}?enablejsapi=1&origin=${location.origin}"
+      allow="autoplay"
+    ></iframe>
+  `;
+
+  renderPlaylist();
+}
+
+function renderPlaylist(){
+  $("playlist").innerHTML = "";
+
+  data.songs.forEach((song, i)=>{
+    const item = document.createElement("div");
+    item.className = "item" + (i === current ? " active" : "");
+    item.onclick = () => loadSong(i);
+
+    const img = song.cover || data.mainImage || "";
+
+    item.innerHTML = `
+      <div class="thumb" style="background-image:url('${img}')"></div>
+      <div>
+        <div class="item-title">${song.title}</div>
+        <div class="item-artist">${song.artist || ""} · ${song.time || "2:53"}</div>
+      </div>
+      <div class="menu">≡</div>
+    `;
+
+    $("playlist").appendChild(item);
+  });
+}
+
+function toggleMusic(){
+  const iframe = document.getElementById("yt");
+
+  if(!iframe){
+    if(data.songs.length) loadSong(0);
+    return;
+  }
+
+  if(!isPlaying){
+    iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    $("playBtn").innerText = "Ⅱ";
+    isPlaying = true;
+  }else{
+    iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+    $("playBtn").innerText = "▶";
+    isPlaying = false;
+  }
+}
+
+function nextSong(){
+  if(!data.songs.length) return;
+  const next = (current + 1) % data.songs.length;
+  loadSong(next);
+}
+
+function prevSong(){
+  if(!data.songs.length) return;
+  const prev = (current - 1 + data.songs.length) % data.songs.length;
+  loadSong(prev);
+}
+
+if(data.songs.length){
+  loadSong(0);
+}else{
+  renderPlaylist();
+}
+</script>
+
+</body>
+</html>
