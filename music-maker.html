@@ -7,6 +7,11 @@
 <style>
 *{box-sizing:border-box}
 
+:root{
+  --accent:#1DB954;
+  --coverColor:rgba(80,80,80,.65);
+}
+
 body{
   margin:0;
   background:#101010;
@@ -111,7 +116,11 @@ button{
 .album-head{
   padding:28px 26px 24px;
   background:
-    linear-gradient(180deg,rgba(255,255,255,.22),rgba(18,18,18,.96) 88%);
+    linear-gradient(
+      180deg,
+      var(--coverColor) 0%,
+      rgba(18,18,18,.96) 88%
+    );
 }
 
 .album-info{
@@ -183,6 +192,7 @@ button{
   font-size:25px;
   font-weight:900;
   cursor:pointer;
+  padding-left:4px;
 }
 
 .action-icon{
@@ -193,6 +203,10 @@ button{
 
 .action-icon:hover{
   color:white;
+}
+
+.action-icon.active{
+  color:var(--accent);
 }
 
 .list-mode{
@@ -306,7 +320,7 @@ button{
 </style>
 </head>
 
-<body style="--accent:#1DB954;">
+<body>
 
 <div class="wrap">
   <div class="panel">
@@ -359,7 +373,7 @@ button{
 
       <div class="actions">
         <div class="play-main" id="previewPlayBtn" onclick="previewToggleMusic()">▶</div>
-        <div class="action-icon" onclick="replayPreviewSong()">↻</div>
+        <div class="action-icon" id="loopBtn" onclick="toggleLoop()">↻</div>
         <div class="action-icon">⋯</div>
         <div class="list-mode">목록 ☰</div>
       </div>
@@ -397,6 +411,7 @@ let startImgY = 0;
 
 let previewPlaying = false;
 let previewCurrentIndex = 0;
+let loopMode = false;
 
 function getYoutubeId(url){
   if(!url) return "";
@@ -446,7 +461,7 @@ $("imageScale").oninput = e=>{
 };
 
 $("accentColor").oninput = e=>{
-  document.body.style.setProperty("--accent", e.target.value);
+  document.documentElement.style.setProperty("--accent", e.target.value);
 };
 
 function resetImagePosition(){
@@ -456,6 +471,46 @@ function resetImagePosition(){
 
   $("imageScale").value = 1;
   applyImageTransform();
+}
+
+function extractMainColor(imgSrc){
+  const img = new Image();
+  img.src = imgSrc;
+
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = 40;
+    canvas.height = 40;
+
+    ctx.drawImage(img, 0, 0, 40, 40);
+
+    const data = ctx.getImageData(0,0,40,40).data;
+
+    let r = 0, g = 0, b = 0, count = 0;
+
+    for(let i=0; i<data.length; i+=4){
+      r += data[i];
+      g += data[i+1];
+      b += data[i+2];
+      count++;
+    }
+
+    r = Math.floor(r / count);
+    g = Math.floor(g / count);
+    b = Math.floor(b / count);
+
+    document.documentElement.style.setProperty(
+      "--coverColor",
+      `rgba(${r},${g},${b},.68)`
+    );
+  };
+}
+
+function toggleLoop(){
+  loopMode = !loopMode;
+  $("loopBtn").classList.toggle("active", loopMode);
 }
 
 function addSong(title="GAL", artist="OHAYO", youtube="", time="2:53"){
@@ -501,6 +556,8 @@ $("mainImage").onchange = e => {
   reader.onload = () => {
     mainImageData = reader.result;
     $("coverImg").src = mainImageData;
+
+    extractMainColor(mainImageData);
     resetImagePosition();
     updatePreview();
   };
@@ -534,7 +591,7 @@ function previewLoadSong(song, index, autoPlay=false){
         id="previewYt"
         width="1"
         height="1"
-        src="https://www.youtube.com/embed/${song.youtube}?enablejsapi=1&origin=${location.origin}"
+        src="https://www.youtube.com/embed/${song.youtube}?enablejsapi=1&origin=${location.origin}&loop=${loopMode ? 1 : 0}&playlist=${song.youtube}"
         allow="autoplay"
       ></iframe>
     `;
@@ -581,15 +638,6 @@ function previewToggleMusic(){
   }
 }
 
-function replayPreviewSong(){
-  const songs = collectSongs();
-  const song = songs[previewCurrentIndex];
-
-  if(!song) return;
-
-  previewLoadSong(song, previewCurrentIndex, true);
-}
-
 function updatePreview(){
   $("previewTitle").innerText = $("homeTitle").value;
   $("previewName").innerText = $("homeName").value;
@@ -621,7 +669,7 @@ function updatePreview(){
   });
 
   if(songs.length && !document.getElementById("previewYt")){
-    previewLoadSong(songs[0], 0, false);
+    previewLoadSong(songs[0],0,false);
   }
 }
 
@@ -630,12 +678,14 @@ function makeHome(){
     title: $("homeTitle").value,
     maker: $("homeName").value,
     accentColor: $("accentColor").value,
+    coverColor: getComputedStyle(document.documentElement).getPropertyValue("--coverColor"),
     mainImage: mainImageData,
     imagePosition:{
       x: imgX,
       y: imgY,
       scale: imgScale
     },
+    loopMode: loopMode,
     songs: collectSongs().filter(song=>song.youtube)
   };
 
