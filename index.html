@@ -125,14 +125,20 @@ textarea{
 }
 
 .title{
+  .title{
   font-size:58px;
   font-weight:900;
-  line-height:.95;
+  line-height:1.2;
   margin-bottom:16px;
+
   width:430px;
-  max-height:128px;
-  overflow:hidden;
+  min-height:70px;
+
+  overflow:visible;
   word-break:keep-all;
+  white-space:normal;
+
+  padding-bottom:10px;
 }
 
 .meta{
@@ -257,16 +263,31 @@ $("imageInput").onchange = e => {
 };
 
 function savePNG(){
-  html2canvas($("capture"), {
-    backgroundColor: null,
-    scale: 2
-  }).then(canvas => {
-    const link = document.createElement("a");
-    link.download = "netflix-maker.png";
-    link.href = canvas.toDataURL("image/png");
-    link.click();
+
+  document.fonts.ready.then(()=>{
+
+    html2canvas($("capture"),{
+      backgroundColor:null,
+      scale:3,
+      useCORS:true,
+      logging:false,
+      scrollX:0,
+      scrollY:0
+    }).then(canvas=>{
+
+      const link=document.createElement("a");
+
+      link.download="netflix-maker.png";
+      link.href=canvas.toDataURL("image/png");
+
+      link.click();
+
+    });
+
   });
+
 }
+ 
 
 updateAll();
 </script>
