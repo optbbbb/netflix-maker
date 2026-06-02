@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>Character Music Maker</title>
+<style>
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:#111;
+  color:white;
+  font-family:Arial, sans-serif;
+}
+
+.wrap{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:380px 1fr;
+}
+
+.panel{
+  padding:28px;
+  background:#181818;
+  overflow:auto;
+}
+
+h1{
+  margin:0 0 24px;
+  font-size:28px;
+}
+
+label{
+  display:block;
+  margin-top:15px;
+  color:#aaa;
+  font-size:13px;
+  font-weight:700;
+}
+
+input{
+  width:100%;
+  margin-top:7px;
+  padding:12px;
+  border:1px solid #444;
+  border-radius:8px;
+  background:#242424;
+  color:white;
+}
+
+button{
+  width:100%;
+  margin-top:16px;
+  padding:14px;
+  border:0;
+  border-radius:999px;
+  font-weight:900;
+  cursor:pointer;
+}
+
+.add{
+  background:#333;
+  color:white;
+}
+
+.make{
+  background:white;
+  color:black;
+}
+
+.song{
+  margin-top:16px;
+  padding:14px;
+  background:#202020;
+  border:1px solid #333;
+  border-radius:14px;
+}
+
+.remove{
+  background:#5a1e1e;
+  color:white;
+  padding:10px;
+}
+
+.preview{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:40px;
+}
+
+.phone{
+  width:390px;
+  height:760px;
+  background:#121212;
+  border-radius:34px;
+  overflow:hidden;
+  box-shadow:0 25px 80px rgba(0,0,0,.55);
+}
+
+.hero{
+  height:390px;
+  background:#333;
+  background-size:cover;
+  background-position:center;
+  position:relative;
+}
+
+.hero::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(0deg,#121212 0%,rgba(0,0,0,.1) 60%);
+}
+
+.hero-text{
+  position:absolute;
+  left:24px;
+  bottom:38px;
+  z-index:2;
+}
+
+.hero-title{
+  font-size:34px;
+  font-weight:900;
+}
+
+.hero-sub{
+  margin-top:8px;
+  color:#ddd;
+  font-size:18px;
+}
+
+.controls{
+  height:110px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:34px;
+  font-size:28px;
+}
+
+.play{
+  width:68px;
+  height:68px;
+  border-radius:50%;
+  background:white;
+  color:black;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:32px;
+  font-weight:900;
+}
+
+.list{
+  padding:20px;
+}
+
+.list-title{
+  font-size:22px;
+  font-weight:900;
+  margin-bottom:16px;
+}
+
+.item{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:14px;
+}
+
+.thumb{
+  width:54px;
+  height:54px;
+  background:#333;
+  background-size:cover;
+  background-position:center;
+}
+
+.item-name{
+  font-size:18px;
+  font-weight:700;
+}
+
+.item-artist{
+  color:#aaa;
+  font-size:14px;
+  margin-top:4px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+  <div class="panel">
+    <h1>music home maker</h1>
+
+    <label>홈피 제목</label>
+    <input id="homeTitle" value="내 현재 재생목록">
+
+    <label>캐릭터 / 제작자 이름</label>
+    <input id="homeName" value="OP T">
+
+    <label>메인 캐릭터 이미지</label>
+    <input type="file" id="mainImage" accept="image/*">
+
+    <div id="songList"></div>
+
+    <button class="add" onclick="addSong()">+ 노래 추가</button>
+    <button class="make" onclick="makeHome()">홈피 만들기</button>
+
+    <label>완성 링크</label>
+    <input id="resultLink" readonly>
+  </div>
+
+  <div class="preview">
+    <div class="phone">
+      <div class="hero" id="previewHero">
+        <div class="hero-text">
+          <div class="hero-title" id="previewTitle">내 현재 재생목록</div>
+          <div class="hero-sub" id="previewName">OP T</div>
+        </div>
+      </div>
+
+      <div class="controls">
+        <div>⏮</div>
+        <div class="play">▶</div>
+        <div>⏭</div>
+      </div>
+
+      <div class="list">
+        <div class="list-title">playlist</div>
+        <div id="previewSongs"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+let mainImageData = "";
+let songIndex = 0;
+
+function getYoutubeId(url){
+  if(!url) return "";
+  if(url.includes("youtube.com/watch?v=")){
+    return url.split("v=")[1].split("&")[0];
+  }
+  if(url.includes("youtu.be/")){
+    return url.split("youtu.be/")[1].split("?")[0];
+  }
+  return url.trim();
+}
+
+function addSong(){
+  songIndex++;
+
+  const box = document.createElement("div");
+  box.className = "song";
+
+  box.innerHTML = `
+    <label>앨범 이미지</label>
+    <input type="file" class="song-cover" accept="image/*">
+
+    <label>노래 제목</label>
+    <input class="song-title" value="GAL">
+
+    <label>아티스트 / 캐릭터명</label>
+    <input class="song-artist" value="OHAYO">
+
+    <label>유튜브 링크 또는 ID</label>
+    <input class="song-youtube" placeholder="https://youtu.be/...">
+
+    <label>재생시간</label>
+    <input class="song-time" value="2:53">
+
+    <button class="remove" onclick="this.parentElement.remove(); updatePreview();">삭제</button>
+  `;
+
+  $("songList").appendChild(box);
+
+  const fileInput = box.querySelector(".song-cover");
+  fileInput.onchange = e => {
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      fileInput.dataset.image = reader.result;
+      updatePreview();
+    };
+    reader.readAsDataURL(file);
+  };
+
+  box.querySelectorAll("input").forEach(input=>{
+    input.oninput = updatePreview;
+  });
+
+  updatePreview();
+}
+
+$("homeTitle").oninput = updatePreview;
+$("homeName").oninput = updatePreview;
+
+$("mainImage").onchange = e => {
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    mainImageData = reader.result;
+    $("previewHero").style.backgroundImage = `url(${mainImageData})`;
+    updatePreview();
+  };
+  reader.readAsDataURL(file);
+};
+
+function collectSongs(){
+  const boxes = document.querySelectorAll(".song");
+
+  return [...boxes].map(box=>{
+    return {
+      title: box.querySelector(".song-title").value,
+      artist: box.querySelector(".song-artist").value,
+      youtube: getYoutubeId(box.querySelector(".song-youtube").value),
+      time: box.querySelector(".song-time").value,
+      cover: box.querySelector(".song-cover").dataset.image || mainImageData
+    };
+  }).filter(song=>song.title);
+}
+
+function updatePreview(){
+  $("previewTitle").innerText = $("homeTitle").value;
+  $("previewName").innerText = $("homeName").value;
+
+  const songs = collectSongs();
+  $("previewSongs").innerHTML = "";
+
+  songs.forEach(song=>{
+    const item = document.createElement("div");
+    item.className = "item";
+    item.innerHTML = `
+      <div class="thumb" style="background-image:url('${song.cover || ""}')"></div>
+      <div>
+        <div class="item-name">${song.title}</div>
+        <div class="item-artist">${song.artist} · ${song.time}</div>
+      </div>
+    `;
+    $("previewSongs").appendChild(item);
+  });
+}
+
+function makeHome(){
+  const data = {
+    title: $("homeTitle").value,
+    maker: $("homeName").value,
+    mainImage: mainImageData,
+    songs: collectSongs().filter(song=>song.youtube)
+  };
+
+  localStorage.setItem("musicHomeData", JSON.stringify(data));
+
+  const base = location.href.replace("index.html","");
+  const url = base + "player.html";
+
+  $("resultLink").value = url;
+  window.open(url, "_blank");
+}
+
+addSong();
+</script>
+
+</body>
+</html>
