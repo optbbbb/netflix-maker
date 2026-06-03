@@ -31,14 +31,23 @@ body{
   font-weight:900;
 }
 
+.top-buttons{
+  display:flex;
+  gap:10px;
+}
+
 button{
   background:#e50914;
   color:white;
   border:0;
-  padding:12px 20px;
+  padding:12px 18px;
   border-radius:4px;
   font-weight:700;
   cursor:pointer;
+}
+
+button.secondary{
+  background:#333;
 }
 
 .wrap{
@@ -169,6 +178,20 @@ textarea{
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
+  cursor:pointer;
+}
+
+.status{
+  margin-top:14px;
+  font-size:13px;
+  color:#aaa;
+  line-height:1.5;
+}
+
+.hidden{
+  width:0;
+  height:0;
+  overflow:hidden;
 }
 </style>
 </head>
@@ -177,7 +200,12 @@ textarea{
 
 <div class="top">
   <div class="logo">NETFLIX MAKER</div>
-  <button onclick="savePNG()">완성 PNG 저장</button>
+
+  <div class="top-buttons">
+    <button class="secondary" onclick="toggleMusic()">음악 재생</button>
+    <button class="secondary" onclick="saveVideo()">WEBM 영상 저장</button>
+    <button onclick="savePNG()">완성 PNG 저장</button>
+  </div>
 </div>
 
 <div class="wrap">
@@ -199,6 +227,19 @@ textarea{
 
     <label>버튼 문구</label>
     <input id="buttonInput" value="▶ 재생">
+
+    <label>유튜브 링크 또는 ID</label>
+    <input id="youtubeInput" placeholder="https://youtu.be/xxxxx">
+
+    <label>MP3 / 오디오 파일 업로드</label>
+    <input type="file" id="audioInput" accept="audio/*">
+
+    <label>영상 저장 길이 초</label>
+    <input id="durationInput" type="number" value="8" min="1" max="60">
+
+    <div class="status" id="status">
+      유튜브는 사이트에서 재생 가능. 영상 저장에 소리까지 넣으려면 MP3 업로드를 사용해야 함.
+    </div>
   </div>
 
   <div class="preview-area">
@@ -211,14 +252,20 @@ textarea{
         <div class="title" id="titleText">토마토 아이스 클럽</div>
         <div class="meta" id="metaText">2026 · 블랙코미디 · SF 다큐멘터리</div>
         <div class="desc" id="descText">사막 한복판의 냉각 리조트. 손님들은 완벽한 휴식을 위해 이곳에 도착하지만, 곧 이 유토피아의 이상한 규칙을 마주한다.</div>
-        <div class="play" id="buttonText">▶ 재생</div>
+        <div class="play" id="buttonText" onclick="toggleMusic()">▶ 재생</div>
       </div>
     </div>
   </div>
 </div>
 
+<div class="hidden" id="youtubeBox"></div>
+<audio id="audioPlayer"></audio>
+
 <script>
 const $ = id => document.getElementById(id);
+
+let audioFileURL = "";
+let isPlaying = false;
 
 function fitText(el, maxSize, minSize){
   el.style.fontSize = maxSize + "px";
@@ -262,6 +309,101 @@ $("imageInput").onchange = e => {
   reader.readAsDataURL(file);
 };
 
+$("audioInput").onchange = e => {
+  const file = e.target.files[0];
+  if(!file) return;
+
+  if(audioFileURL){
+    URL.revokeObjectURL(audioFileURL);
+  }
+
+  audioFileURL = URL.createObjectURL(file);
+  $("audioPlayer").src = audioFileURL;
+  $("status").innerText = "오디오 파일이 등록됨. 재생 및 WEBM 영상 저장 시 소리 포함 가능.";
+};
+
+function getYoutubeId(url){
+  if(!url) return "";
+
+  if(url.includes("youtube.com/watch?v=")){
+    return url.split("v=")[1].split("&")[0];
+  }
+
+  if(url.includes("youtu.be/")){
+    return url.split("youtu.be/")[1].split("?")[0];
+  }
+
+  return url.trim();
+}
+
+function loadYoutube(){
+  const id = getYoutubeId($("youtubeInput").value);
+  if(!id) return false;
+
+  $("youtubeBox").innerHTML = `
+    <iframe
+      id="yt"
+      width="1"
+      height="1"
+      src="https://www.youtube.com/embed/${id}?enablejsapi=1&origin=${location.origin}"
+      allow="autoplay"
+    ></iframe>
+  `;
+
+  return true;
+}
+
+function playYoutube(){
+  const iframe = document.getElementById("yt");
+
+  if(!iframe){
+    if(!loadYoutube()) return;
+    setTimeout(playYoutube, 500);
+    return;
+  }
+
+  iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+}
+
+function pauseYoutube(){
+  const iframe = document.getElementById("yt");
+  if(!iframe) return;
+
+  iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+}
+
+function toggleMusic(){
+  const audio = $("audioPlayer");
+  const hasAudio = audioFileURL;
+  const hasYoutube = $("youtubeInput").value.trim();
+
+  if(!hasAudio && !hasYoutube){
+    $("status").innerText = "MP3 파일 또는 유튜브 링크를 먼저 넣어줘.";
+    return;
+  }
+
+  if(!isPlaying){
+    if(hasAudio){
+      audio.currentTime = 0;
+      audio.play();
+      $("status").innerText = "MP3 재생 중.";
+    }else{
+      playYoutube();
+      $("status").innerText = "유튜브 재생 중. 단, WEBM 저장에는 유튜브 소리가 포함되지 않을 수 있음.";
+    }
+
+    isPlaying = true;
+    $("buttonText").innerText = "Ⅱ 일시정지";
+  }else{
+    audio.pause();
+    pauseYoutube();
+
+    isPlaying = false;
+    $("buttonText").innerText = $("buttonInput").value;
+    $("status").innerText = "음악 일시정지.";
+  }
+}
+
 function savePNG(){
   document.fonts.ready.then(()=>{
     updateAll();
@@ -282,6 +424,112 @@ function savePNG(){
       });
     },120);
   });
+}
+
+async function saveVideo(){
+  const duration = Math.max(1, Number($("durationInput").value || 8));
+  const capture = $("capture");
+  const audio = $("audioPlayer");
+
+  $("status").innerText = "영상 저장 준비 중...";
+
+  const canvas = await html2canvas(capture,{
+    backgroundColor:null,
+    scale:2,
+    useCORS:true,
+    logging:false,
+    scrollX:0,
+    scrollY:0
+  });
+
+  const videoCanvas = document.createElement("canvas");
+  videoCanvas.width = canvas.width;
+  videoCanvas.height = canvas.height;
+
+  const ctx = videoCanvas.getContext("2d");
+
+  let startTime = null;
+  let animationId;
+
+  function drawFrame(time){
+    if(!startTime) startTime = time;
+
+    const elapsed = (time - startTime) / 1000;
+    const zoom = 1 + elapsed * 0.006;
+
+    ctx.clearRect(0,0,videoCanvas.width,videoCanvas.height);
+
+    ctx.save();
+    ctx.translate(videoCanvas.width / 2, videoCanvas.height / 2);
+    ctx.scale(zoom, zoom);
+    ctx.translate(-videoCanvas.width / 2, -videoCanvas.height / 2);
+    ctx.drawImage(canvas,0,0);
+    ctx.restore();
+
+    if(elapsed < duration){
+      animationId = requestAnimationFrame(drawFrame);
+    }
+  }
+
+  requestAnimationFrame(drawFrame);
+
+  const canvasStream = videoCanvas.captureStream(30);
+  let finalStream = canvasStream;
+
+  if(audioFileURL){
+    audio.currentTime = 0;
+    await audio.play();
+
+    const audioCtx = new AudioContext();
+    const source = audioCtx.createMediaElementSource(audio);
+    const dest = audioCtx.createMediaStreamDestination();
+
+    source.connect(dest);
+    source.connect(audioCtx.destination);
+
+    finalStream = new MediaStream([
+      ...canvasStream.getVideoTracks(),
+      ...dest.stream.getAudioTracks()
+    ]);
+
+    $("status").innerText = "WEBM 영상 녹화 중. MP3 소리 포함.";
+  }else{
+    $("status").innerText = "WEBM 영상 녹화 중. 유튜브 소리는 저장에 포함되지 않을 수 있음.";
+  }
+
+  const recorder = new MediaRecorder(finalStream,{
+    mimeType:"video/webm"
+  });
+
+  const chunks = [];
+
+  recorder.ondataavailable = e => {
+    if(e.data.size > 0) chunks.push(e.data);
+  };
+
+  recorder.onstop = () => {
+    cancelAnimationFrame(animationId);
+
+    audio.pause();
+
+    const blob = new Blob(chunks,{type:"video/webm"});
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.download = "netflix-maker-video.webm";
+    link.href = url;
+    link.click();
+
+    URL.revokeObjectURL(url);
+
+    $("status").innerText = "WEBM 영상 저장 완료.";
+  };
+
+  recorder.start();
+
+  setTimeout(()=>{
+    recorder.stop();
+  }, duration * 1000);
 }
 
 updateAll();
