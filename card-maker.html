@@ -3,37 +3,79 @@
 <head>
 <meta charset="UTF-8">
 <title>Music Card Home Maker</title>
+
 <style>
 *{box-sizing:border-box}
+
 body{
   margin:0;
-  font-family:Arial,sans-serif;
-  background:#f7f5f2;
-  color:#222;
+  font-family:Arial, sans-serif;
+  background:#f7f6f3;
+  color:#111;
 }
+
 .wrap{
-  display:grid;
-  grid-template-columns:360px 1fr;
   min-height:100vh;
+  display:grid;
+  grid-template-columns:310px 1fr;
 }
+
 .panel{
-  background:white;
-  border-right:1px solid #ddd;
-  padding:24px;
-  overflow:auto;
   height:100vh;
+  overflow:auto;
+  background:#fff;
+  border-right:1px solid #e5e2dc;
+  padding:22px;
 }
-h1{margin:0 0 18px;font-size:24px;letter-spacing:2px}
-label{display:block;margin-top:14px;font-size:13px;color:#666;font-weight:700}
-input,textarea{
+
+.panel-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:22px;
+}
+
+h1{
+  margin:0;
+  font-size:22px;
+  letter-spacing:-1px;
+}
+
+.small-btn{
+  width:auto;
+  margin:0;
+  padding:9px 14px;
+  border:1px solid #ddd;
+  background:#fff;
+  color:#111;
+  border-radius:10px;
+}
+
+label{
+  display:block;
+  margin-top:16px;
+  font-size:13px;
+  font-weight:700;
+  color:#333;
+}
+
+input, textarea{
   width:100%;
-  margin-top:6px;
-  padding:11px;
+  margin-top:7px;
+  padding:12px;
   border:1px solid #ddd;
   border-radius:10px;
-  background:#fafafa;
+  background:#fff;
+  color:#111;
+  font-size:14px;
 }
-textarea{height:78px;resize:none}
+
+textarea{
+  height:96px;
+  resize:none;
+  line-height:1.55;
+}
+
 button{
   width:100%;
   margin-top:14px;
@@ -42,88 +84,287 @@ button{
   border-radius:12px;
   font-weight:900;
   cursor:pointer;
+  font-size:14px;
 }
-.add{background:#eee}
-.make{background:#111;color:white}
+
+.add{
+  background:#111;
+  color:white;
+}
+
+.make{
+  background:#7c5cff;
+  color:white;
+}
+
+.remove{
+  background:#fff0f0;
+  color:#d70000;
+  border:1px solid #ffd5d5;
+}
+
 .card-input{
   margin-top:18px;
   padding:14px;
-  border:1px solid #ddd;
+  background:#fff;
+  border:1px solid #e5e2dc;
   border-radius:16px;
-  background:#fafafa;
 }
-.remove{background:#ffe6e6;color:#b00000}
+
 .preview{
-  padding:48px;
+  min-width:0;
+  height:100vh;
   overflow:auto;
+  padding:44px 46px;
+  background:#f7f6f3;
 }
+
 .site-title{
   display:flex;
+  align-items:flex-start;
   justify-content:space-between;
-  align-items:center;
-  margin-bottom:32px;
+  margin-bottom:68px;
 }
+
 .site-title h2{
-  font-size:28px;
-  letter-spacing:8px;
   margin:0;
+  font-size:30px;
+  letter-spacing:10px;
+  font-weight:500;
 }
-.grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
-  gap:34px;
+
+.site-title p{
+  margin:10px 0 0;
+  color:#666;
+  font-size:16px;
 }
-.music-card{
-  background:white;
-  border-radius:22px;
-  overflow:hidden;
-  box-shadow:0 16px 40px rgba(0,0,0,.08);
-}
-.music-card img{
-  width:100%;
-  height:260px;
-  object-fit:cover;
-  display:block;
-}
-.card-body{
-  padding:24px;
-  min-height:150px;
-  position:relative;
-}
-.song{
-  color:#777;
-  font-size:13px;
-  margin-bottom:14px;
-}
-.quote{
-  font-size:18px;
-  line-height:1.6;
-  margin-right:54px;
-}
-.name{
-  margin-top:18px;
-  font-weight:900;
-}
-.play{
-  position:absolute;
-  right:22px;
-  bottom:24px;
-  width:46px;
-  height:46px;
-  border:1px solid #aaa;
+
+.music-icon{
+  width:54px;
+  height:54px;
+  border:1px solid #ddd;
   border-radius:50%;
   display:flex;
   align-items:center;
   justify-content:center;
+  font-size:24px;
+  background:#fff;
+}
+
+.grid{
+  display:flex;
+  gap:26px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding:10px 0 38px;
+  scroll-behavior:smooth;
+}
+
+.grid::-webkit-scrollbar{
+  height:8px;
+}
+
+.grid::-webkit-scrollbar-track{
+  background:#ece9e4;
+  border-radius:999px;
+}
+
+.grid::-webkit-scrollbar-thumb{
+  background:#cfcac2;
+  border-radius:999px;
+}
+
+.music-card{
+  flex:0 0 300px;
+  width:300px;
+  height:560px;
+  border-radius:22px;
+  overflow:hidden;
+  position:relative;
+  background:#ddd;
+  box-shadow:0 18px 40px rgba(0,0,0,.14);
+  transition:.25s ease;
+}
+
+.music-card:hover{
+  transform:translateY(-8px);
+  box-shadow:0 26px 54px rgba(0,0,0,.18);
+}
+
+.music-card img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.music-card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(180deg,rgba(0,0,0,.18) 0%,rgba(0,0,0,0) 35%),
+    linear-gradient(0deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.35) 38%,rgba(0,0,0,0) 70%);
+  pointer-events:none;
+}
+
+.card-top{
+  position:absolute;
+  top:22px;
+  left:22px;
+  right:22px;
+  z-index:2;
+  color:white;
+  font-size:14px;
+  font-weight:700;
+  opacity:.92;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.dot-title::before{
+  content:"○ ";
+  font-size:12px;
+}
+
+.card-body{
+  position:absolute;
+  left:24px;
+  right:24px;
+  bottom:26px;
+  z-index:2;
+  color:white;
+}
+
+.quote{
+  font-size:20px;
+  line-height:1.55;
+  font-weight:800;
+  white-space:pre-line;
+  text-shadow:0 2px 12px rgba(0,0,0,.35);
+  margin-bottom:20px;
+}
+
+.divider{
+  width:34px;
+  height:1px;
+  background:rgba(255,255,255,.78);
+  margin-bottom:20px;
+}
+
+.name{
+  font-size:18px;
+  font-weight:900;
+}
+
+.play{
+  position:absolute;
+  right:22px;
+  bottom:24px;
+  width:48px;
+  height:48px;
+  border:1px solid rgba(255,255,255,.78);
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:white;
+  z-index:3;
+  background:rgba(0,0,0,.12);
+  backdrop-filter:blur(8px);
   cursor:pointer;
+  padding-left:3px;
+}
+
+.card-list{
+  margin-top:20px;
+}
+
+.list-item{
+  display:grid;
+  grid-template-columns:44px 1fr 24px;
+  gap:10px;
+  align-items:center;
+  padding:8px;
+  border:1px solid #eee;
+  border-radius:10px;
+  margin-bottom:8px;
+  background:#fff;
+}
+
+.list-thumb{
+  width:44px;
+  height:44px;
+  border-radius:8px;
+  background:#ddd;
+  background-size:cover;
+  background-position:center;
+}
+
+.list-name{
+  font-weight:800;
+  font-size:13px;
+}
+
+.list-song{
+  color:#777;
+  font-size:12px;
+  margin-top:3px;
+}
+
+.hidden{
+  width:0;
+  height:0;
+  overflow:hidden;
+}
+
+@media(max-width:900px){
+  .wrap{
+    grid-template-columns:1fr;
+  }
+
+  .panel{
+    height:auto;
+  }
+
+  .preview{
+    height:auto;
+    padding:34px 24px;
+  }
+
+  .site-title{
+    margin-bottom:36px;
+  }
+}
+
+@media(max-width:600px){
+  .site-title h2{
+    font-size:23px;
+    letter-spacing:6px;
+  }
+
+  .music-card{
+    flex-basis:280px;
+    width:280px;
+    height:520px;
+  }
+
+  .preview{
+    padding:28px 18px;
+  }
 }
 </style>
 </head>
+
 <body>
 
 <div class="wrap">
   <div class="panel">
-    <h1>CARD MAKER</h1>
+    <div class="panel-head">
+      <h1>카드 추가하기</h1>
+      <button class="small-btn" onclick="addCard()">＋ 카드 추가</button>
+    </div>
 
     <label>홈페이지 제목</label>
     <input id="pageTitle" value="MY MUSIC CARDS">
@@ -135,6 +376,8 @@ button{
 
     <button class="add" onclick="addCard()">+ 카드 추가</button>
     <button class="make" onclick="downloadHome()">홈페이지 HTML 뽑기</button>
+
+    <div class="card-list" id="cardList"></div>
   </div>
 
   <div class="preview">
@@ -143,28 +386,37 @@ button{
         <h2 id="previewTitle">MY MUSIC CARDS</h2>
         <p id="previewSub">나만의 음악 카드 모음</p>
       </div>
-      <div>♪</div>
+      <div class="music-icon">♪</div>
     </div>
+
     <div class="grid" id="previewGrid"></div>
   </div>
 </div>
 
+<div class="hidden" id="ytBox"></div>
+
 <script>
-const $=id=>document.getElementById(id);
-let cardCount=0;
+const $ = id => document.getElementById(id);
 
 function getYoutubeId(url){
   if(!url) return "";
-  if(url.includes("watch?v=")) return url.split("v=")[1].split("&")[0];
-  if(url.includes("youtu.be/")) return url.split("youtu.be/")[1].split("?")[0];
+
+  if(url.includes("watch?v=")){
+    return url.split("v=")[1].split("&")[0];
+  }
+
+  if(url.includes("youtu.be/")){
+    return url.split("youtu.be/")[1].split("?")[0];
+  }
+
   return url.trim();
 }
 
 function addCard(){
-  cardCount++;
-  const box=document.createElement("div");
-  box.className="card-input";
-  box.innerHTML=`
+  const box = document.createElement("div");
+  box.className = "card-input";
+
+  box.innerHTML = `
     <label>이미지</label>
     <input type="file" class="img" accept="image/*">
 
@@ -172,7 +424,8 @@ function addCard(){
     <input class="name" value="하린">
 
     <label>한마디</label>
-    <textarea class="quote">별빛이 내리는 밤, 우리의 이야기는 계속돼.</textarea>
+    <textarea class="quote" maxlength="100">별빛이 내리는 밤,
+우리의 이야기는 계속돼.</textarea>
 
     <label>노래 제목</label>
     <input class="song" value="Starry Night">
@@ -180,130 +433,179 @@ function addCard(){
     <label>유튜브 링크 또는 ID</label>
     <input class="youtube" placeholder="https://youtu.be/...">
 
-    <button class="remove" onclick="this.parentElement.remove();render()">삭제</button>
+    <button class="remove" onclick="this.parentElement.remove(); render();">삭제</button>
   `;
+
   $("cards").appendChild(box);
 
-  box.querySelector(".img").onchange=e=>{
-    const file=e.target.files[0];
+  const imgInput = box.querySelector(".img");
+
+  imgInput.onchange = e => {
+    const file = e.target.files[0];
     if(!file) return;
-    const reader=new FileReader();
-    reader.onload=()=>{
-      e.target.dataset.src=reader.result;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      imgInput.dataset.src = reader.result;
       render();
     };
     reader.readAsDataURL(file);
   };
 
-  box.querySelectorAll("input,textarea").forEach(el=>el.oninput=render);
+  box.querySelectorAll("input, textarea").forEach(el=>{
+    el.oninput = render;
+  });
+
   render();
 }
 
-function collect(){
-  return [...document.querySelectorAll(".card-input")].map(box=>({
-    img:box.querySelector(".img").dataset.src||"",
-    name:box.querySelector(".name").value,
-    quote:box.querySelector(".quote").value,
-    song:box.querySelector(".song").value,
-    youtube:getYoutubeId(box.querySelector(".youtube").value)
+function collectCards(){
+  return [...document.querySelectorAll(".card-input")].map(box => ({
+    img: box.querySelector(".img").dataset.src || "",
+    name: box.querySelector(".name").value,
+    quote: box.querySelector(".quote").value,
+    song: box.querySelector(".song").value,
+    youtube: getYoutubeId(box.querySelector(".youtube").value)
   }));
 }
 
+function playSong(id){
+  if(!id){
+    alert("유튜브 링크를 넣어줘.");
+    return;
+  }
+
+  $("ytBox").innerHTML = `
+    <iframe
+      width="1"
+      height="1"
+      src="https://www.youtube.com/embed/${id}?autoplay=1&enablejsapi=1"
+      allow="autoplay">
+    </iframe>
+  `;
+}
+
 function render(){
-  $("previewTitle").innerText=$("pageTitle").value;
-  $("previewSub").innerText=$("pageSub").value;
-  const cards=collect();
-  $("previewGrid").innerHTML="";
-  cards.forEach((c,i)=>{
-    const div=document.createElement("div");
-    div.className="music-card";
-    div.innerHTML=`
-      <img src="${c.img}">
-      <div class="card-body">
-        <div class="song">○ ${c.song}</div>
-        <div class="quote">“${c.quote}”</div>
-        <div class="name">${c.name}</div>
-        <div class="play" onclick="playSong('${c.youtube}')">▶</div>
+  $("previewTitle").innerText = $("pageTitle").value;
+  $("previewSub").innerText = $("pageSub").value;
+
+  const cards = collectCards();
+
+  $("previewGrid").innerHTML = "";
+  $("cardList").innerHTML = "";
+
+  cards.forEach((c, i)=>{
+    const card = document.createElement("div");
+    card.className = "music-card";
+
+    card.innerHTML = `
+      ${c.img ? `<img src="${c.img}">` : ""}
+      <div class="card-top">
+        <div class="dot-title">${c.song || "Untitled"}</div>
+        <div>⋯</div>
       </div>
+
+      <div class="card-body">
+        <div class="quote">“${c.quote || ""}”</div>
+        <div class="divider"></div>
+        <div class="name">${c.name || ""}</div>
+      </div>
+
+      <div class="play" onclick="playSong('${c.youtube}')">▶</div>
     `;
-    $("previewGrid").appendChild(div);
+
+    $("previewGrid").appendChild(card);
+
+    const listItem = document.createElement("div");
+    listItem.className = "list-item";
+    listItem.innerHTML = `
+      <div class="list-thumb" style="background-image:url('${c.img}')"></div>
+      <div>
+        <div class="list-name">${c.name || "이름 없음"}</div>
+        <div class="list-song">${c.song || "노래 없음"}</div>
+      </div>
+      <div>⋮</div>
+    `;
+    $("cardList").appendChild(listItem);
   });
 }
 
-let ytBox;
-function playSong(id){
-  if(!id) return alert("유튜브 링크를 넣어줘.");
-  if(!ytBox){
-    ytBox=document.createElement("div");
-    ytBox.style.width="0";
-    ytBox.style.height="0";
-    ytBox.style.overflow="hidden";
-    document.body.appendChild(ytBox);
-  }
-  ytBox.innerHTML=`
-    <iframe width="1" height="1"
-      src="https://www.youtube.com/embed/${id}?autoplay=1&enablejsapi=1"
-      allow="autoplay">
-    </iframe>`;
-}
-
-function escapeText(str){
-  return String(str).replace(/`/g,"\\`").replace(/\$/g,"\\$");
+function safe(str){
+  return String(str || "")
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;");
 }
 
 function downloadHome(){
-  const title=$("pageTitle").value;
-  const sub=$("pageSub").value;
-  const cards=collect();
+  const title = $("pageTitle").value;
+  const sub = $("pageSub").value;
+  const cards = collectCards();
 
-  const html=`<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<title>${escapeText(title)}</title>
+<title>${safe(title)}</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;font-family:Arial,sans-serif;background:#f7f5f2;color:#222}
-.page{padding:54px;max-width:1400px;margin:auto}
-.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:38px}
-h1{font-size:30px;letter-spacing:8px;margin:0}
-.sub{color:#777;margin-top:8px}
-.music{font-size:28px;border:1px solid #ddd;width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:34px}
-.card{background:white;border-radius:22px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.08);transition:.25s}
-.card:hover{transform:translateY(-6px)}
-.card img{width:100%;height:270px;object-fit:cover;display:block}
-.body{padding:24px;min-height:160px;position:relative}
-.song{color:#777;font-size:13px;margin-bottom:14px}
-.quote{font-size:18px;line-height:1.6;margin-right:54px;white-space:pre-line}
-.name{margin-top:18px;font-weight:900}
-.play{position:absolute;right:22px;bottom:24px;width:46px;height:46px;border:1px solid #aaa;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer}
-@media(max-width:700px){.page{padding:26px}.grid{grid-template-columns:1fr}h1{font-size:24px;letter-spacing:5px}}
+body{margin:0;font-family:Arial,sans-serif;background:#f7f6f3;color:#111}
+.page{padding:54px 46px;min-height:100vh}
+.head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:68px}
+h1{margin:0;font-size:30px;letter-spacing:10px;font-weight:500}
+.sub{margin-top:10px;color:#666;font-size:16px}
+.music-icon{width:54px;height:54px;border:1px solid #ddd;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;background:#fff}
+.grid{display:flex;gap:26px;overflow-x:auto;overflow-y:hidden;padding:10px 0 38px;scroll-behavior:smooth}
+.grid::-webkit-scrollbar{height:8px}
+.grid::-webkit-scrollbar-track{background:#ece9e4;border-radius:999px}
+.grid::-webkit-scrollbar-thumb{background:#cfcac2;border-radius:999px}
+.card{flex:0 0 300px;width:300px;height:560px;border-radius:22px;overflow:hidden;position:relative;background:#ddd;box-shadow:0 18px 40px rgba(0,0,0,.14);transition:.25s ease}
+.card:hover{transform:translateY(-8px);box-shadow:0 26px 54px rgba(0,0,0,.18)}
+.card img{width:100%;height:100%;object-fit:cover;display:block}
+.card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.18) 0%,rgba(0,0,0,0) 35%),linear-gradient(0deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.35) 38%,rgba(0,0,0,0) 70%);pointer-events:none}
+.card-top{position:absolute;top:22px;left:22px;right:22px;z-index:2;color:white;font-size:14px;font-weight:700;opacity:.92;display:flex;justify-content:space-between}
+.dot-title::before{content:"○ ";font-size:12px}
+.card-body{position:absolute;left:24px;right:24px;bottom:26px;z-index:2;color:white}
+.quote{font-size:20px;line-height:1.55;font-weight:800;white-space:pre-line;text-shadow:0 2px 12px rgba(0,0,0,.35);margin-bottom:20px}
+.divider{width:34px;height:1px;background:rgba(255,255,255,.78);margin-bottom:20px}
+.name{font-size:18px;font-weight:900}
+.play{position:absolute;right:22px;bottom:24px;width:48px;height:48px;border:1px solid rgba(255,255,255,.78);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;z-index:3;background:rgba(0,0,0,.12);backdrop-filter:blur(8px);cursor:pointer;padding-left:3px}
+#yt{width:0;height:0;overflow:hidden}
+@media(max-width:700px){.page{padding:34px 20px}h1{font-size:24px;letter-spacing:6px}.head{margin-bottom:36px}.card{flex-basis:280px;width:280px;height:520px}}
 </style>
 </head>
 <body>
 <div class="page">
   <div class="head">
     <div>
-      <h1>${escapeText(title)}</h1>
-      <div class="sub">${escapeText(sub)}</div>
+      <h1>${safe(title)}</h1>
+      <div class="sub">${safe(sub)}</div>
     </div>
-    <div class="music">♪</div>
+    <div class="music-icon">♪</div>
   </div>
+
   <div class="grid">
-    ${cards.map(c=>`
+    ${cards.map(c => `
     <div class="card">
-      <img src="${c.img}">
-      <div class="body">
-        <div class="song">○ ${escapeText(c.song)}</div>
-        <div class="quote">“${escapeText(c.quote)}”</div>
-        <div class="name">${escapeText(c.name)}</div>
-        <div class="play" onclick="playSong('${c.youtube}')">▶</div>
+      ${c.img ? `<img src="${c.img}">` : ""}
+      <div class="card-top">
+        <div class="dot-title">${safe(c.song)}</div>
+        <div>⋯</div>
       </div>
-    </div>`).join("")}
+      <div class="card-body">
+        <div class="quote">“${safe(c.quote)}”</div>
+        <div class="divider"></div>
+        <div class="name">${safe(c.name)}</div>
+      </div>
+      <div class="play" onclick="playSong('${safe(c.youtube)}')">▶</div>
+    </div>
+    `).join("")}
   </div>
 </div>
-<div id="yt" style="width:0;height:0;overflow:hidden"></div>
+
+<div id="yt"></div>
+
 <script>
 function playSong(id){
   if(!id){alert("음악 링크가 없습니다.");return;}
@@ -314,17 +616,20 @@ function playSong(id){
 </body>
 </html>`;
 
-  const blob=new Blob([html],{type:"text/html"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url;
-  a.download="music-cards-home.html";
+  const blob = new Blob([html], {type:"text/html"});
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "music-cards-home.html";
   a.click();
+
   URL.revokeObjectURL(url);
 }
 
-$("pageTitle").oninput=render;
-$("pageSub").oninput=render;
+$("pageTitle").oninput = render;
+$("pageSub").oninput = render;
+
 addCard();
 </script>
 
