@@ -184,11 +184,17 @@ button{
   background:#ddd;
   box-shadow:0 18px 40px rgba(0,0,0,.14);
   transition:.25s ease;
+  cursor:pointer;
 }
 
 .music-card:hover{
   transform:translateY(-8px);
   box-shadow:0 26px 54px rgba(0,0,0,.18);
+}
+
+.music-card.playing{
+  transform:translateY(-12px);
+  box-shadow:0 30px 70px rgba(0,0,0,.26);
 }
 
 .music-card img{
@@ -203,8 +209,13 @@ button{
   position:absolute;
   inset:0;
   background:
-    linear-gradient(180deg,rgba(0,0,0,.18) 0%,rgba(0,0,0,0) 35%),
-    linear-gradient(0deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.35) 38%,rgba(0,0,0,0) 70%);
+    linear-gradient(
+      180deg,
+      rgba(var(--mainColor), .10) 0%,
+      rgba(var(--mainColor), .02) 32%,
+      rgba(var(--mainColor), .36) 62%,
+      rgba(0,0,0,.82) 100%
+    );
   pointer-events:none;
 }
 
@@ -217,7 +228,7 @@ button{
   color:white;
   font-size:14px;
   font-weight:700;
-  opacity:.92;
+  opacity:.95;
   display:flex;
   justify-content:space-between;
   align-items:center;
@@ -226,6 +237,20 @@ button{
 .dot-title::before{
   content:"○ ";
   font-size:12px;
+}
+
+.now{
+  display:none;
+  font-size:12px;
+  letter-spacing:1px;
+}
+
+.music-card.playing .now{
+  display:block;
+}
+
+.music-card.playing .more{
+  display:none;
 }
 
 .card-body{
@@ -242,7 +267,7 @@ button{
   line-height:1.55;
   font-weight:800;
   white-space:pre-line;
-  text-shadow:0 2px 12px rgba(0,0,0,.35);
+  text-shadow:none;
   margin-bottom:20px;
 }
 
@@ -271,10 +296,27 @@ button{
   justify-content:center;
   color:white;
   z-index:3;
-  background:rgba(0,0,0,.12);
+  background:rgba(0,0,0,.10);
   backdrop-filter:blur(8px);
   cursor:pointer;
   padding-left:3px;
+}
+
+.music-card.playing .play{
+  background:white;
+  color:black;
+  border-color:white;
+  padding-left:0;
+}
+
+.music-card.playing .play::before{
+  content:"Ⅱ";
+  font-size:18px;
+  font-weight:900;
+}
+
+.music-card.playing .play{
+  font-size:0;
 }
 
 .card-list{
@@ -398,6 +440,9 @@ button{
 <script>
 const $ = id => document.getElementById(id);
 
+let currentSongId = "";
+let isPlaying = false;
+
 function getYoutubeId(url){
   if(!url) return "";
 
@@ -410,6 +455,37 @@ function getYoutubeId(url){
   }
 
   return url.trim();
+}
+
+function extractColor(src, callback){
+  const img = new Image();
+  img.src = src;
+
+  img.onload = () => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.width = 40;
+    canvas.height = 40;
+    ctx.drawImage(img, 0, 0, 40, 40);
+
+    const data = ctx.getImageData(0,0,40,40).data;
+
+    let r=0, g=0, b=0, count=0;
+
+    for(let i=0; i<data.length; i+=4){
+      r += data[i];
+      g += data[i+1];
+      b += data[i+2];
+      count++;
+    }
+
+    r = Math.floor(r / count);
+    g = Math.floor(g / count);
+    b = Math.floor(b / count);
+
+    callback(`${r},${g},${b}`);
+  };
 }
 
 function addCard(){
@@ -445,10 +521,16 @@ function addCard(){
     if(!file) return;
 
     const reader = new FileReader();
+
     reader.onload = () => {
       imgInput.dataset.src = reader.result;
-      render();
+
+      extractColor(reader.result, color => {
+        imgInput.dataset.color = color;
+        render();
+      });
     };
+
     reader.readAsDataURL(file);
   };
 
@@ -462,6 +544,7 @@ function addCard(){
 function collectCards(){
   return [...document.querySelectorAll(".card-input")].map(box => ({
     img: box.querySelector(".img").dataset.src || "",
+    color: box.querySelector(".img").dataset.color || "0,0,0",
     name: box.querySelector(".name").value,
     quote: box.querySelector(".quote").value,
     song: box.querySelector(".song").value,
@@ -469,10 +552,37 @@ function collectCards(){
   }));
 }
 
-function playSong(id){
+function stopSong(){
+  currentSongId = "";
+  isPlaying = false;
+
+  $("ytBox").innerHTML = "";
+
+  document.querySelectorAll(".music-card").forEach(card=>{
+    card.classList.remove("playing");
+  });
+}
+
+function playSong(id, cardEl){
   if(!id){
     alert("유튜브 링크를 넣어줘.");
     return;
+  }
+
+  if(currentSongId === id && isPlaying){
+    stopSong();
+    return;
+  }
+
+  currentSongId = id;
+  isPlaying = true;
+
+  document.querySelectorAll(".music-card").forEach(card=>{
+    card.classList.remove("playing");
+  });
+
+  if(cardEl){
+    cardEl.classList.add("playing");
   }
 
   $("ytBox").innerHTML = `
@@ -494,15 +604,19 @@ function render(){
   $("previewGrid").innerHTML = "";
   $("cardList").innerHTML = "";
 
-  cards.forEach((c, i)=>{
+  cards.forEach((c)=>{
     const card = document.createElement("div");
     card.className = "music-card";
+    card.style.setProperty("--mainColor", c.color || "0,0,0");
+
+    card.onclick = () => playSong(c.youtube, card);
 
     card.innerHTML = `
       ${c.img ? `<img src="${c.img}">` : ""}
       <div class="card-top">
         <div class="dot-title">${c.song || "Untitled"}</div>
-        <div>⋯</div>
+        <div class="more">⋯</div>
+        <div class="now">NOW PLAYING</div>
       </div>
 
       <div class="card-body">
@@ -511,7 +625,7 @@ function render(){
         <div class="name">${c.name || ""}</div>
       </div>
 
-      <div class="play" onclick="playSong('${c.youtube}')">▶</div>
+      <div class="play" onclick="event.stopPropagation(); playSong('${c.youtube}', this.closest('.music-card'))">▶</div>
     `;
 
     $("previewGrid").appendChild(card);
@@ -526,6 +640,7 @@ function render(){
       </div>
       <div>⋮</div>
     `;
+
     $("cardList").appendChild(listItem);
   });
 }
@@ -560,17 +675,23 @@ h1{margin:0;font-size:30px;letter-spacing:10px;font-weight:500}
 .grid::-webkit-scrollbar{height:8px}
 .grid::-webkit-scrollbar-track{background:#ece9e4;border-radius:999px}
 .grid::-webkit-scrollbar-thumb{background:#cfcac2;border-radius:999px}
-.card{flex:0 0 300px;width:300px;height:560px;border-radius:22px;overflow:hidden;position:relative;background:#ddd;box-shadow:0 18px 40px rgba(0,0,0,.14);transition:.25s ease}
+.card{flex:0 0 300px;width:300px;height:560px;border-radius:22px;overflow:hidden;position:relative;background:#ddd;box-shadow:0 18px 40px rgba(0,0,0,.14);transition:.25s ease;cursor:pointer}
 .card:hover{transform:translateY(-8px);box-shadow:0 26px 54px rgba(0,0,0,.18)}
+.card.playing{transform:translateY(-12px);box-shadow:0 30px 70px rgba(0,0,0,.26)}
 .card img{width:100%;height:100%;object-fit:cover;display:block}
-.card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.18) 0%,rgba(0,0,0,0) 35%),linear-gradient(0deg,rgba(0,0,0,.78) 0%,rgba(0,0,0,.35) 38%,rgba(0,0,0,0) 70%);pointer-events:none}
-.card-top{position:absolute;top:22px;left:22px;right:22px;z-index:2;color:white;font-size:14px;font-weight:700;opacity:.92;display:flex;justify-content:space-between}
+.card::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(var(--mainColor),.10) 0%,rgba(var(--mainColor),.02) 32%,rgba(var(--mainColor),.36) 62%,rgba(0,0,0,.82) 100%);pointer-events:none}
+.card-top{position:absolute;top:22px;left:22px;right:22px;z-index:2;color:white;font-size:14px;font-weight:700;opacity:.95;display:flex;justify-content:space-between}
 .dot-title::before{content:"○ ";font-size:12px}
+.now{display:none;font-size:12px;letter-spacing:1px}
+.card.playing .now{display:block}
+.card.playing .more{display:none}
 .card-body{position:absolute;left:24px;right:24px;bottom:26px;z-index:2;color:white}
-.quote{font-size:20px;line-height:1.55;font-weight:800;white-space:pre-line;text-shadow:0 2px 12px rgba(0,0,0,.35);margin-bottom:20px}
+.quote{font-size:20px;line-height:1.55;font-weight:800;white-space:pre-line;text-shadow:none;margin-bottom:20px}
 .divider{width:34px;height:1px;background:rgba(255,255,255,.78);margin-bottom:20px}
 .name{font-size:18px;font-weight:900}
-.play{position:absolute;right:22px;bottom:24px;width:48px;height:48px;border:1px solid rgba(255,255,255,.78);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;z-index:3;background:rgba(0,0,0,.12);backdrop-filter:blur(8px);cursor:pointer;padding-left:3px}
+.play{position:absolute;right:22px;bottom:24px;width:48px;height:48px;border:1px solid rgba(255,255,255,.78);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;z-index:3;background:rgba(0,0,0,.10);backdrop-filter:blur(8px);cursor:pointer;padding-left:3px}
+.card.playing .play{background:white;color:black;border-color:white;padding-left:0;font-size:0}
+.card.playing .play::before{content:"Ⅱ";font-size:18px;font-weight:900}
 #yt{width:0;height:0;overflow:hidden}
 @media(max-width:700px){.page{padding:34px 20px}h1{font-size:24px;letter-spacing:6px}.head{margin-bottom:36px}.card{flex-basis:280px;width:280px;height:520px}}
 </style>
@@ -587,18 +708,19 @@ h1{margin:0;font-size:30px;letter-spacing:10px;font-weight:500}
 
   <div class="grid">
     ${cards.map(c => `
-    <div class="card">
+    <div class="card" style="--mainColor:${c.color || "0,0,0"}" onclick="playSong('${safe(c.youtube)}', this)">
       ${c.img ? `<img src="${c.img}">` : ""}
       <div class="card-top">
         <div class="dot-title">${safe(c.song)}</div>
-        <div>⋯</div>
+        <div class="more">⋯</div>
+        <div class="now">NOW PLAYING</div>
       </div>
       <div class="card-body">
         <div class="quote">“${safe(c.quote)}”</div>
         <div class="divider"></div>
         <div class="name">${safe(c.name)}</div>
       </div>
-      <div class="play" onclick="playSong('${safe(c.youtube)}')">▶</div>
+      <div class="play" onclick="event.stopPropagation(); playSong('${safe(c.youtube)}', this.closest('.card'))">▶</div>
     </div>
     `).join("")}
   </div>
@@ -607,8 +729,30 @@ h1{margin:0;font-size:30px;letter-spacing:10px;font-weight:500}
 <div id="yt"></div>
 
 <script>
-function playSong(id){
+let currentSongId = "";
+let isPlaying = false;
+
+function stopSong(){
+  currentSongId = "";
+  isPlaying = false;
+  document.getElementById("yt").innerHTML = "";
+  document.querySelectorAll(".card").forEach(card=>card.classList.remove("playing"));
+}
+
+function playSong(id, cardEl){
   if(!id){alert("음악 링크가 없습니다.");return;}
+
+  if(currentSongId === id && isPlaying){
+    stopSong();
+    return;
+  }
+
+  currentSongId = id;
+  isPlaying = true;
+
+  document.querySelectorAll(".card").forEach(card=>card.classList.remove("playing"));
+  if(cardEl) cardEl.classList.add("playing");
+
   document.getElementById("yt").innerHTML =
     '<iframe width="1" height="1" src="https://www.youtube.com/embed/'+id+'?autoplay=1&enablejsapi=1" allow="autoplay"></iframe>';
 }
