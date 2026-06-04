@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -97,7 +98,7 @@ textarea{
   position:absolute;
   inset:0;
   background-size:cover;
-  background-position:center top;
+  background-position:50% 0%;
   opacity:.78;
 }
 
@@ -185,6 +186,12 @@ textarea{
     <label>배경 이미지 업로드</label>
     <input type="file" id="imageInput" accept="image/*">
 
+    <label>이미지 좌우 이동</label>
+    <input type="range" id="posX" min="0" max="100" value="50">
+
+    <label>이미지 상하 이동</label>
+    <input type="range" id="posY" min="0" max="100" value="0">
+
     <label>작품 제목</label>
     <input id="titleInput" value="토마토 아이스 클럽">
 
@@ -222,7 +229,6 @@ const $ = id => document.getElementById(id);
 
 function fitText(el, maxSize, minSize){
   el.style.fontSize = maxSize + "px";
-
   let size = maxSize;
 
   while(
@@ -234,12 +240,20 @@ function fitText(el, maxSize, minSize){
   }
 }
 
+function updateImagePosition(){
+  const x = $("posX").value;
+  const y = $("posY").value;
+  $("bg").style.backgroundPosition = `${x}% ${y}%`;
+}
+
 function updateAll(){
   $("titleText").innerText = $("titleInput").value;
   $("labelText").innerText = $("labelInput").value;
   $("metaText").innerText = $("metaInput").value;
   $("descText").innerText = $("descInput").value;
   $("buttonText").innerText = $("buttonInput").value;
+
+  updateImagePosition();
 
   requestAnimationFrame(()=>{
     fitText($("titleText"), 72, 44);
@@ -251,6 +265,10 @@ function updateAll(){
   $(id).oninput = updateAll;
 });
 
+["posX","posY"].forEach(id=>{
+  $(id).oninput = updateImagePosition;
+});
+
 $("imageInput").onchange = e => {
   const file = e.target.files[0];
   if(!file) return;
@@ -258,6 +276,7 @@ $("imageInput").onchange = e => {
   const reader = new FileReader();
   reader.onload = () => {
     $("bg").style.backgroundImage = `url(${reader.result})`;
+    updateImagePosition();
   };
   reader.readAsDataURL(file);
 };
@@ -289,3 +308,4 @@ updateAll();
 
 </body>
 </html>
+```
