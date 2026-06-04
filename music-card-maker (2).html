@@ -198,6 +198,7 @@ body{font-family:var(--font-b);background:var(--bg);color:var(--text);min-height
 let ytPlayer = null;
 let ytReady = false;
 let pendingVideoId = null;
+let isPaused = false;
 
 window.onYouTubeIframeAPIReady = function(){
   ytPlayer = new YT.Player('yt-player', {
@@ -213,6 +214,8 @@ window.onYouTubeIframeAPIReady = function(){
       },
       onStateChange: function(e){
         if(e.data === YT.PlayerState.ENDED) autoNext();
+        if(e.data === YT.PlayerState.PAUSED) isPaused = true;
+        if(e.data === YT.PlayerState.PLAYING) isPaused = false;
       }
     }
   });
@@ -220,6 +223,7 @@ window.onYouTubeIframeAPIReady = function(){
 
 function ytPlay(videoId){
   if(!videoId) return;
+  isPaused = false;
   if(ytReady && ytPlayer){
     ytPlayer.loadVideoById(videoId);
   } else {
@@ -229,6 +233,7 @@ function ytPlay(videoId){
 
 function ytStop(){
   if(ytReady && ytPlayer) ytPlayer.stopVideo();
+  isPaused = false;
   pendingVideoId = null;
 }
 
@@ -258,9 +263,25 @@ function playTrack(cardId, trackIdx){
 
   const vid = parseYtId(track.youtube);
   if(!vid){
-    // 링크 없으면 다음으로
     playTrack(cardId, trackIdx + 1);
     return;
+  }
+
+  // 같은 곡 탭 → 멈추거나 처음부터
+  if(curCardId === cardId && curTrackIdx === trackIdx){
+    if(!isPaused){
+      // 재생 중 → 멈추기
+      if(ytReady && ytPlayer) ytPlayer.stopVideo();
+      isPaused = true;
+      refreshPlaylistUI();
+      return;
+    } else {
+      // 멈춘 상태 → 처음부터 재생
+      isPaused = false;
+      ytPlay(vid);
+      refreshPlaylistUI();
+      return;
+    }
   }
 
   curCardId = cardId;
@@ -719,7 +740,7 @@ h1{font-family:'Bebas Neue',sans-serif;font-size:52px;letter-spacing:5px;line-he
 <div id="yt-wrap"><div id="yt-player"></div></div>
 <script src="https://www.youtube.com/iframe_api"><\/script>
 <script>
-var ytPlayer=null,ytReady=false,pendingVid=null,curCard=null,curIdx=-1;
+var ytPlayer=null,ytReady=false,pendingVid=null,curCard=null,curIdx=-1,isPaused=false;
 
 window.onYouTubeIframeAPIReady=function(){
   ytPlayer=new YT.Player('yt-player',{
@@ -732,6 +753,8 @@ window.onYouTubeIframeAPIReady=function(){
       },
       onStateChange:function(e){
         if(e.data===YT.PlayerState.ENDED)autoNext();
+        if(e.data===YT.PlayerState.PAUSED)isPaused=true;
+        if(e.data===YT.PlayerState.PLAYING)isPaused=false;
       }
     }
   });
@@ -739,6 +762,7 @@ window.onYouTubeIframeAPIReady=function(){
 
 function ytPlay(vid){
   if(!vid)return;
+  isPaused=false;
   if(ytReady&&ytPlayer){ytPlayer.loadVideoById(vid);}
   else{pendingVid=vid;}
 }
@@ -749,6 +773,14 @@ function playTrack(cardId,idx){
   var tracks=JSON.parse(el.dataset.tracks);
   var vid=tracks[idx];
   if(!vid){playTrack(cardId,idx+1);return;}
+  if(curCard===cardId&&curIdx===idx){
+    if(!isPaused){
+      if(ytReady&&ytPlayer)ytPlayer.stopVideo();
+      isPaused=true;refreshUI();return;
+    } else {
+      isPaused=false;ytPlay(vid);refreshUI();return;
+    }
+  }
   curCard=cardId;curIdx=idx;
   ytPlay(vid);
   refreshUI();
